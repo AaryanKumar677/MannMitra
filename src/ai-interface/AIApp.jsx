@@ -8,7 +8,7 @@ import { Context } from "../ai-interface/context/Context";
 import GuestPrompt from "../components/GuestPrompt";
 
 const CommunityPage = React.lazy(() =>
-  import("../ai-interface/ai-component/Community/Community")
+  import("../ai-interface/ai-component/Community/CommunityHub")
 );
 
 const AIApp = () => {

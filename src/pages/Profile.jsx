@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getProfile, updateProfile } from "../config/auth";
-import { supabase } from "../config/supabaseClient";
+import { useAuth } from "../context/AuthContext";
 import { LogOut } from "lucide-react";
 
 export default function Profile({ onClose }) {
@@ -8,6 +8,7 @@ export default function Profile({ onClose }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const { user, profile: authProfile, signOut } = useAuth();
 
   const [form, setForm] = useState({
     first_name: "",
@@ -17,48 +18,37 @@ export default function Profile({ onClose }) {
     email: "",
   });
 
-  useEffect(() => {
     async function fetchProfile() {
-      console.log("➡️ Fetching logged in user...");
-      setLoading(true);
-
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      console.log("🔎 Current user:", user);
-
       if (user) {
-        const { profile, error } = await getProfile(user.id);
-        console.log("✅ getProfile result:", { profile, error });
-
-        if (!error && profile) {
-          setProfile(profile);
+        setLoading(true);
+        if (authProfile) {
+          setProfile(authProfile);
           setForm({
-            first_name: profile.first_name || "",
-            last_name: profile.last_name || "",
-            age: profile.age || "",
-            phone_number: profile.phone_number || "",
-            email: profile.email || user.email || "", // 👈 fallback email
+            first_name: authProfile.first_name || "",
+            last_name: authProfile.last_name || "",
+            age: authProfile.age || "",
+            phone_number: authProfile.phone_number || "",
+            email: authProfile.email || user.email || "",
           });
         } else {
-          console.warn("⚠️ No profile found or error:", error);
-          setForm({
-            first_name: "",
-            last_name: "",
-            age: "",
-            phone_number: "",
-            email: user.email || "",
-          });
+          const { profile, error } = await getProfile(user.uid);
+          if (!error && profile) {
+            setProfile(profile);
+            setForm({
+              first_name: profile.first_name || "",
+              last_name: profile.last_name || "",
+              age: profile.age || "",
+              phone_number: profile.phone_number || "",
+              email: profile.email || user.email || "",
+            });
+          }
         }
+        setLoading(false);
       }
-
-      setLoading(false);
-      console.log("✅ Finished fetching profile");
     }
 
     fetchProfile();
-  }, []);
+  }, [user, authProfile]);
 
 
   function handleChange(e) {
@@ -69,10 +59,6 @@ export default function Profile({ onClose }) {
     e.preventDefault();
     setSaving(true);
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
     if (user) {
       const updates = {
         first_name: form.first_name,
@@ -80,7 +66,7 @@ export default function Profile({ onClose }) {
         age: form.age,
       };
 
-      const { profile: updated, error } = await updateProfile(user.id, updates);
+      const { profile: updated, error } = await updateProfile(user.uid, updates);
       if (!error && updated) {
         setProfile(updated);
         alert("✅ Profile updated successfully!");
@@ -93,7 +79,7 @@ export default function Profile({ onClose }) {
   }
 
   async function handleLogout() {
-    await supabase.auth.signOut();
+    await signOut();
     setShowLogoutConfirm(false);
     onClose();
   }

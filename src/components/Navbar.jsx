@@ -1,17 +1,18 @@
-import { supabase } from "../config/supabaseClient";
+import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
 
   async function handleLogout() {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error("Logout error:", error.message);
-      alert("Logout failed ❌");
-    } else {
+    try {
+      await signOut();
       alert("Logged out successfully ✅");
       navigate("/login");
+    } catch (error) {
+      console.error("Logout error:", error.message);
+      alert("Logout failed ❌");
     }
   }
 

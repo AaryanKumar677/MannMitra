@@ -1,0 +1,362 @@
+/* CommunityHub.css — Scoped, fixed-layout (paste entire file)
+   - Scoped to .ch-community-root (no global color leaks)
+   - Minimal safe global reset included to prevent horizontal overflow
+*/
+
+/* Inter font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap');
+
+/* --- minimal safe global reset --- */
+html, body { height: 100%; margin: 0; }
+*, *::before, *::after { box-sizing: border-box; }
+/* Safety net: prevent accidental horizontal overflow from any component */
+body { overflow-x: hidden; }
+
+/* =============================
+   Component-scoped theme & layout
+   ============================= */
+.ch-community-root {
+  /* theme vars (scoped to this component only) */
+  --bg-dark: #050816;
+  --grad-a: #07122a;
+  --grad-b: #061826;
+  --glass: rgba(255,255,255,0.035);
+  --muted: #9fb0c9;
+  --accent-1: #6dd3ff;
+  --accent-2: #7c5cff;
+  --accent-3: #ff6b8a;
+  --card-radius: 14px;
+  --card-radius-lg: 18px;
+  --card-shadow: 0 20px 60px rgba(2,6,23,0.7);
+  --glass-border: rgba(255,255,255,0.035);
+  --max-width: 1300px;
+  --content-gap: 20px;
+  --ui-ease: 180ms cubic-bezier(.2,.9,.2,1);
+  --focus-ring: 3px solid rgba(124,92,255,0.18);
+
+  /* typography & layout */
+  font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  color: #eaf6ff;
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* sizing & background */
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  width: 100%;               /* IMPORTANT: 100% (not 100vw) to avoid scroll issues */
+  left: 0;
+  top: 0;
+
+  /* decorative background (scoped to component) */
+  background:
+    radial-gradient(900px 420px at 8% 8%, rgba(124,92,255,0.06), transparent 6%),
+    radial-gradient(700px 350px at 92% 92%, rgba(109,211,255,0.05), transparent 6%),
+    linear-gradient(180deg, var(--grad-a), var(--grad-b));
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  /* ensure any accidental overflow inside component is hidden horizontally */
+  overflow-x: hidden;
+}
+
+/* decorative blobs positioned fixed so they don't create scroll width */
+.ch-community-root::before,
+.ch-community-root::after {
+  content: "";
+  position: fixed;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(56px) saturate(110%);
+  opacity: 0.72;
+}
+.ch-community-root::before {
+  width: 420px;
+  height: 420px;
+  left: -120px;
+  top: -60px;
+  background: linear-gradient(135deg, var(--accent-2), var(--accent-1));
+  transform: rotate(-8deg);
+}
+.ch-community-root::after {
+  width: 360px;
+  height: 360px;
+  right: -100px;
+  bottom: -100px;
+  background: linear-gradient(135deg, var(--accent-3), rgba(139,92,246,0.55));
+  transform: rotate(18deg);
+}
+
+/* wrapper so content sits above blobs */
+.ch-community-root .ch-wrap {
+  max-width: var(--max-width);
+  margin: 28px auto;
+  padding: 18px;
+  position: relative;
+  z-index: 2;
+}
+
+/* =============================
+   Header / Tabs / Controls
+   ============================= */
+.ch-community-root .ch-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  position: sticky;
+  top: 18px;
+  z-index: 30;
+  backdrop-filter: blur(6px) saturate(120%);
+  padding: 10px 6px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.02);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  box-shadow: 0 12px 30px rgba(2,6,23,0.45);
+}
+.ch-community-root .ch-header-left h1 {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: #fff;
+}
+.ch-community-root .ch-subtitle {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* tabs */
+.ch-community-root .ch-center-tabs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+  padding: 6px;
+}
+.ch-community-root .ch-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.02);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 700;
+  transition: all var(--ui-ease);
+}
+.ch-community-root .ch-tab-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(2,6,23,0.45);
+}
+.ch-community-root .ch-tab-btn.active {
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+  color: #021029;
+  box-shadow: 0 22px 54px rgba(107,70,255,0.12);
+  transform: translateY(-6px);
+}
+
+/* actions/search */
+.ch-community-root .ch-actions { display: flex; gap: 12px; align-items: center; }
+.ch-community-root .ch-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid var(--glass);
+  box-shadow: 0 8px 24px rgba(2,6,23,0.35);
+}
+.ch-community-root .ch-search input {
+  background: transparent;
+  border: 0;
+  outline: none;
+  color: var(--muted);
+  width: 260px;
+  font-size: 14px;
+}
+
+/* primary button */
+.ch-community-root .ch-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 0;
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(107,70,255,0.16);
+  transition: transform var(--ui-ease), box-shadow var(--ui-ease);
+}
+.ch-community-root .ch-btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 44px rgba(107,70,255,0.22);
+}
+.ch-community-root .ch-btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.04);
+  padding: 8px 10px;
+  border-radius: 10px;
+  color: var(--muted);
+}
+
+/* =============================
+   Layout grid (scoped) + overflow fixes
+   ============================= */
+.ch-community-root .ch-container {
+  display: grid;
+  grid-template-columns: 300px minmax(620px, 1fr) 360px;
+  gap: var(--content-gap);
+  align-items: start;
+  width: 100%;
+}
+
+/* CRITICAL: allow grid children to shrink — prevents a single child from forcing horizontal expand */
+.ch-community-root .ch-container > * { min-width: 0; }
+
+@media (max-width:1200px) {
+  .ch-community-root .ch-container { grid-template-columns: 260px minmax(560px, 1fr) 320px; }
+}
+@media (max-width:1024px) {
+  .ch-community-root .ch-container { grid-template-columns: 1fr; padding: 0 10px; }
+  .ch-community-root .ch-aside-left, .ch-community-root .ch-aside-right { display: none; }
+}
+
+/* =============================
+   Cards, feed, posts (scoped)
+   ============================= */
+
+/* stronger opaque card background so blobs don't show through cards */
+.ch-community-root .ch-card {
+  background: linear-gradient(180deg, rgba(8,20,38,0.92), rgba(6,14,24,0.92));
+  border-radius: var(--card-radius);
+  padding: 14px;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  background-clip: padding-box;
+  z-index: 3;
+}
+
+/* topic pills */
+.ch-community-root .ch-topic-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.015);
+  color: #cfefff;
+  margin: 6px 6px 6px 0;
+  border: 1px solid rgba(255,255,255,0.02);
+  cursor: pointer;
+  transition: transform var(--ui-ease), box-shadow var(--ui-ease);
+}
+.ch-community-root .ch-topic-pill:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(2,6,23,0.35); }
+.ch-community-root .ch-topic-pill.ch-active { background: linear-gradient(90deg, var(--accent-1), var(--accent-2)); box-shadow: 0 12px 40px rgba(107,70,255,0.12); color: #021029; }
+
+/* members */
+.ch-community-root .ch-members { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+.ch-community-root .ch-member {
+  display: flex; gap: 10px; align-items: center; padding: 8px; border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+  border: 1px solid rgba(255,255,255,0.02);
+}
+.ch-community-root .ch-member img { width: 44px; height: 44px; border-radius: 999px; object-fit: cover; border: 2px solid rgba(255,255,255,0.03); }
+
+/* feed & skeleton */
+.ch-community-root .ch-feed { display: flex; flex-direction: column; gap: 20px; padding-bottom: 24px; }
+.ch-community-root .ch-skeleton { height: 120px; border-radius: 12px; background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.04), rgba(255,255,255,0.02)); background-size: 200% 100%; animation: ch-skeleton 1.6s linear infinite; }
+@keyframes ch-skeleton { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+
+/* post card */
+.ch-community-root .ch-post {
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 18px; border-radius: var(--card-radius-lg);
+  border: 1px solid rgba(255,255,255,0.02);
+  background: linear-gradient(180deg, rgba(12,26,42,0.95), rgba(6,18,30,0.95));
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  z-index: 3;
+}
+.ch-community-root .ch-post:hover { transform: translateY(-10px); box-shadow: 0 40px 90px rgba(2,6,23,0.75); border-color: rgba(255,255,255,0.035); }
+
+/* meta & content */
+.ch-community-root .ch-meta { display: flex; gap: 14px; align-items: center; }
+.ch-community-root .ch-meta img { width: 56px; height: 56px; border-radius: 999px; border: 2px solid rgba(255,255,255,0.03); object-fit: cover; }
+.ch-community-root .ch-who { display: flex; flex-direction: column; }
+.ch-community-root .ch-name { font-weight: 800; color: #fff; font-size: 15px; }
+.ch-community-root .ch-time { font-size: 13px; color: var(--muted); }
+.ch-community-root .ch-title { margin-top: 14px; font-size: 18px; font-weight: 800; color: #f7fbff; }
+.ch-community-root .ch-body { margin-top: 10px; color: #dfeeff; font-size: 15px; line-height: 1.6; white-space: pre-wrap; }
+
+/* attachments: ensure images never overflow */
+.ch-community-root .ch-attachments { margin-top: 14px; display: flex; gap: 12px; flex-direction: column; }
+.ch-community-root .ch-attachments img { width: 100%; max-height: 460px; border-radius: 12px; object-fit: cover; box-shadow: 0 16px 46px rgba(2,6,23,0.6); max-width: 100%; }
+
+/* actions */
+.ch-community-root .ch-actions-row { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; gap: 12px; }
+.ch-community-root .ch-left { display: flex; gap: 10px; align-items: center; }
+.ch-community-root .ch-btn-action {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 10px;
+  background: transparent; border: 1px solid rgba(255,255,255,0.03); color: var(--muted); cursor: pointer; transition: all var(--ui-ease);
+}
+.ch-community-root .ch-btn-action:hover { transform: translateY(-3px); color: white; background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.008)); }
+
+/* like animation */
+.ch-community-root .ch-like-anim { transition: transform .18s ease, color .12s; }
+@keyframes ch-pulseLike { 0%{transform:scale(1);opacity:1}40%{transform:scale(1.24);opacity:1}100%{transform:scale(1);opacity:1} }
+.ch-community-root .ch-like-anim.ch-liked { color: var(--accent-3); animation: ch-pulseLike .42s cubic-bezier(.2,.9,.2,1); }
+
+/* comments */
+.ch-community-root .ch-comment-row { display: flex; gap: 8px; margin-top: 12px; }
+.ch-community-root .ch-comment-row input {
+  flex: 1; padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.04);
+  background: linear-gradient(180deg, rgba(255,255,255,0.008), rgba(255,255,255,0.002)); color: #e9f6ff; outline: none;
+}
+.ch-community-root .ch-comment-row input:focus { box-shadow: 0 6px 20px rgba(107,70,255,0.06); border-color: rgba(124,92,255,0.18); }
+.ch-community-root .ch-comment-row button { padding: 8px 12px; border-radius: 10px; background: linear-gradient(90deg, var(--accent-1), var(--accent-2)); border: 0; color: white; }
+
+/* composer modal */
+.ch-community-root .ch-composer-backdrop { position: fixed; inset: 0; background: rgba(2,6,23,0.62); z-index: 60; }
+.ch-community-root .ch-composer {
+  position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%) scale(.98);
+  z-index: 70; width: 95%; max-width: 920px; border-radius: 18px; padding: 18px;
+  background: linear-gradient(180deg,#081427,#071225); border: 1px solid rgba(255,255,255,0.03);
+  box-shadow: 0 40px 120px rgba(2,6,23,0.8); transition: transform .18s ease, opacity .18s ease;
+}
+.ch-community-root .ch-composer.show { transform: translate(-50%,-50%) scale(1); }
+
+/* focus visuals (scoped) */
+.ch-community-root button:focus, .ch-community-root .ch-tab-btn:focus, .ch-community-root input:focus, .ch-community-root textarea:focus {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: 10px;
+}
+
+/* right column tweaks & helpers */
+.ch-community-root .ch-aside-right .ch-card + .ch-card { margin-top: 12px; }
+.ch-community-root .ch-pinned ul { margin: 10px 0; padding-left: 18px; color: #e4f6ff; }
+.ch-community-root .ch-activity .ch-small-note { color: var(--muted); font-size: 13px; }
+
+.ch-community-root .ch-muted { color: var(--muted); }
+.ch-community-root .ch-small { font-size: 13px; color: var(--muted); }
+.ch-community-root .ch-badge { display: inline-block; padding: 8px 12px; border-radius: 999px; background: linear-gradient(90deg, var(--accent-1), var(--accent-2)); color: #021029; font-weight: 800; }
+.ch-community-root .ch-mood-pill { padding: 8px 10px; border-radius: 999px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.02); cursor: pointer; }
+.ch-community-root .ch-mood-pill.active { background: linear-gradient(90deg, var(--accent-1), var(--accent-2)); color: #051225; }
+
+/* images responsive guard */
+.ch-community-root img { max-width: 100%; height: auto; display: block; }
+
+/* responsive tweak for very large screens */
+@media (min-width:1400px) {
+  .ch-community-root .ch-container { grid-template-columns: 320px minmax(760px,1fr) 360px; gap: 28px; }
+}

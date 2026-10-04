@@ -1,36 +1,23 @@
-import { supabase } from "../config/supabaseClient";
+import { auth, db } from "../config/firebase";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 
 export async function signUp({ email, password, firstName, lastName, age, mobile }) {
   try {
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
 
-    if (authError) throw authError;
+    const profileData = {
+      user_id: user.uid,
+      first_name: firstName,
+      last_name: lastName,
+      age: age || null,
+      phone_number: mobile || null,
+      email: email,
+    };
 
-    const user = authData.user;
-
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .insert([
-        {
-          user_id: user.id,
-          first_name: firstName,
-          last_name: lastName,
-          age,
-          phone_number: mobile,
-          email,
-        },
-      ]);
-    if (profileError) {
-      console.error("❌ Profile insert error:", profileError.message);
-    } else {
-      console.log("✅ Profile row inserted for user:", user.id);
-    }
-
-
-    if (profileError) throw profileError;
+    await setDoc(doc(db, "profiles", user.uid), profileData);
+    console.log("✅ Profile row inserted for user:", user.uid);
 
     return { user };
   } catch (error) {
@@ -41,14 +28,8 @@ export async function signUp({ email, password, firstName, lastName, age, mobile
 
 export async function signIn({ email, password }) {
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) throw error;
-
-    return { user: data.user };
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    return { user: userCredential.user };
   } catch (error) {
     console.error("Login error:", error.message);
     return { error };
@@ -59,18 +40,15 @@ export async function getProfile(userId) {
   try {
     console.log("➡️ Fetching profile for userId:", userId);
     
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", userId)
-      .maybeSingle();
+    const docRef = doc(db, "profiles", userId);
+    const docSnap = await getDoc(docRef);
 
-    console.log("📄 Supabase response data:", data);
-    console.log("⚠️ Supabase response error:", error);  
-
-    if (error) return { error };
-
-    return { profile: data };
+    if (docSnap.exists()) {
+      return { profile: docSnap.data() };
+    } else {
+      console.log("No such profile!");
+      return { profile: null };
+    }
   } catch (error) {
     console.error("❌ Get profile error:", error.message);
     return { error };
@@ -79,16 +57,11 @@ export async function getProfile(userId) {
 
 export async function updateProfile(userId, updates) {
   try {
-    const { data, error } = await supabase
-      .from("profiles")
-      .update(updates)
-      .eq("user_id", userId)
-      .select()
-      .single();
+    const docRef = doc(db, "profiles", userId);
+    await updateDoc(docRef, updates);
+    const docSnap = await getDoc(docRef);
 
-    if (error) throw error;
-
-    return { profile: data };
+    return { profile: docSnap.data() };
   } catch (error) {
     console.error("Update profile error:", error.message);
     return { error };

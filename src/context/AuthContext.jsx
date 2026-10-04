@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "../config/supabaseClient";
-import { getProfile } from "../config/auth";
+import { auth, googleProvider } from "../config/firebase";
+import { onAuthStateChanged, signInWithPopup, signOut as firebaseSignOut } from "firebase/auth";
+import { getProfile, signUp as authSignUp, signIn as authSignIn } from "../config/auth";
 
 const AuthContext = createContext();
 
@@ -35,55 +36,43 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     console.log("🔵 AuthProvider: useEffect init");
+    const unsubscribe = onAuthStateChanged(auth, async (newUser) => {
+      console.log("🔵 AuthProvider: onAuthStateChange ->", newUser);
+      setUser(newUser);
 
-    const init = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      const currentUser = session?.user || null;
-      console.log("🔵 AuthProvider: session user =", currentUser);
-      setUser(currentUser);
-
-      if (currentUser) {
-        await refreshProfile(currentUser.id);
+      if (newUser) {
+        await refreshProfile(newUser.uid);
       } else {
         setProfile(null);
       }
       setLoading(false);
-    };
-
-    init();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        const newUser = session?.user || null;
-         console.log("🔵 AuthProvider: onAuthStateChange ->", _event, newUser);
-        setUser(newUser);
-
-        if (newUser) {
-          await refreshProfile(newUser.id);
-        } else {
-          setProfile(null);
-        }
-      }
-    );
+    });
 
     return () => {
-      listener?.subscription?.unsubscribe();
+      unsubscribe();
     };
   }, []);
 
-  const signUp = async (email, password) => {
-    return await supabase.auth.signUp({ email, password });
+  const signUp = async (email, password, firstName, lastName, age, mobile) => {
+    return await authSignUp({ email, password, firstName, lastName, age, mobile });
   };
 
   const signIn = async (email, password) => {
-    return await supabase.auth.signInWithPassword({ email, password });
+    return await authSignIn({ email, password });
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      return { user: result.user };
+    } catch (error) {
+      console.error("Google Sign-In error:", error.message);
+      return { error };
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await firebaseSignOut(auth);
     setUser(null);
     setProfile(null);
   };
@@ -98,18 +87,17 @@ export const AuthProvider = ({ children }) => {
         refreshProfile,
         signUp,
         signIn,
+        signInWithGoogle,
         signOut,
       }}
     >
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
-
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
   console.log("🟢 useAuth() ->", ctx);
   return ctx;
 };
-

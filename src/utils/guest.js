@@ -1,9 +1,10 @@
 // src/utils/guest.js
-import { supabase } from "../config/supabaseClient";
+import { db } from "../config/firebase";
+import { collection, addDoc } from "firebase/firestore";
 
 /**
  * Guest conversations ko localStorage se uthata hai
- * aur nayi user_id ke saath supabase me daal deta hai.
+ * aur nayi user_id ke saath firebase me daal deta hai.
  */
 export async function migrateGuestConversations(userId) {
   try {
@@ -19,22 +20,20 @@ export async function migrateGuestConversations(userId) {
       return;
     }
 
-    // Supabase table: conversations (example)
-    const { error } = await supabase.from("conversations").insert(
-      conversations.map((c) => ({
+    // Firestore collection: conversations
+    const batchPromises = conversations.map((c) =>
+      addDoc(collection(db, "conversations"), {
         user_id: userId,
         message: c.message,
         response: c.response,
         created_at: c.created_at || new Date().toISOString(),
-      }))
+      })
     );
 
-    if (error) {
-      console.error("❌ Failed to migrate guest conversations:", error.message);
-    } else {
-      console.log("✅ Guest conversations migrated to DB.");
-      localStorage.removeItem("mann_guest_conversations"); // cleanup
-    }
+    await Promise.all(batchPromises);
+
+    console.log("✅ Guest conversations migrated to DB.");
+    localStorage.removeItem("mann_guest_conversations"); // cleanup
   } catch (err) {
     console.error("Guest migration error:", err.message);
   }
