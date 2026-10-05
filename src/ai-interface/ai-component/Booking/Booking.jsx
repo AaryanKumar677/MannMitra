@@ -1,6 +1,7 @@
 // Booking.jsx - Redesigned Mental Health & Specialist Booking System
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useAuth } from "../../../context/AuthContext";
+import Profile from "../../../pages/Profile";
 import {
   Search,
   Calendar,
@@ -12,20 +13,17 @@ import {
   CheckCircle2,
   X,
   ChevronRight,
-  Sparkles,
   Award,
   Globe,
   Check,
   ArrowRight,
   Trash2,
-  ExternalLink,
   CalendarCheck,
   Stethoscope,
-  HeartPulse,
   User,
   AlertCircle,
   Copy,
-  Info
+  LogOut
 } from "lucide-react";
 import "./Booking.css";
 
@@ -302,13 +300,54 @@ export default function Booking({ user: propUser }) {
   const authContext = useAuth();
   const authUser = authContext?.user || propUser;
   const profile = authContext?.profile;
+  const signOut = authContext?.signOut;
+
+  // Theme toggle state
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return document.body.classList.contains("dark-mode") || localStorage.getItem("theme") === "dark";
+  });
+
+  const toggleTheme = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    if (newMode) {
+      document.body.classList.add("dark-mode");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.body.classList.remove("dark-mode");
+      localStorage.setItem("theme", "light");
+    }
+  };
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+      setIsDarkMode(true);
+      document.body.classList.add("dark-mode");
+    }
+  }, []);
+
+  // Profile modal and dropdown state
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const profileDropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(e.target)) {
+        setShowProfileDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Active view: 'directory' or 'my-appointments'
   const [activeTab, setActiveTab] = useState("directory");
 
   // Filtering states
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all"); // 'all' | 'doctors' | 'therapists'
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedConcern, setSelectedConcern] = useState("All Concerns");
 
   // Modals state
@@ -324,7 +363,7 @@ export default function Booking({ user: propUser }) {
   const [age, setAge] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [sessionMode, setSessionMode] = useState("Video"); // "Video" | "Audio"
+  const [sessionMode, setSessionMode] = useState("Video");
   const [sessionDuration, setSessionDuration] = useState("45 Min");
   const [selectedDate, setSelectedDate] = useState(() => {
     const today = new Date();
@@ -334,7 +373,7 @@ export default function Booking({ user: propUser }) {
   const [patientConcern, setPatientConcern] = useState("Anxiety & Panic");
   const [notes, setNotes] = useState("");
 
-  // Confirmed booking state (for success screen inside modal)
+  // Confirmed booking state
   const [bookingConfirmed, setBookingConfirmed] = useState(null);
 
   // Persistent appointments
@@ -350,11 +389,11 @@ export default function Booking({ user: propUser }) {
   // Pre-fill user details when available
   useEffect(() => {
     if (profile) {
-      if (profile.firstName) setFirstName(profile.firstName);
-      if (profile.lastName) setLastName(profile.lastName);
+      if (profile.first_name || profile.firstName) setFirstName(profile.first_name || profile.firstName);
+      if (profile.last_name || profile.lastName) setLastName(profile.last_name || profile.lastName);
       if (profile.age) setAge(String(profile.age));
       if (profile.email) setEmail(profile.email);
-      if (profile.mobile) setPhone(profile.mobile);
+      if (profile.phone_number || profile.mobile) setPhone(profile.phone_number || profile.mobile);
     } else if (authUser) {
       if (authUser.displayName) {
         const parts = authUser.displayName.split(" ");
@@ -377,11 +416,9 @@ export default function Booking({ user: propUser }) {
   // Filter specialists
   const filteredSpecialists = useMemo(() => {
     return specialistsData.filter((spec) => {
-      // Category filter
       if (selectedCategory !== "all" && spec.category !== selectedCategory) {
         return false;
       }
-      // Concern filter
       if (
         selectedConcern !== "All Concerns" &&
         !spec.concernTags.includes(selectedConcern) &&
@@ -389,7 +426,6 @@ export default function Booking({ user: propUser }) {
       ) {
         return false;
       }
-      // Search query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchesName = spec.name.toLowerCase().includes(q);
@@ -496,40 +532,120 @@ export default function Booking({ user: propUser }) {
       <div className="booking-ambient-glow booking-glow-1" />
       <div className="booking-ambient-glow booking-glow-2" />
 
+      {/* TOP HEADER BAR: Theme Toggle on Left, Profile Icon on Right */}
+      <div className="booking-topbar">
+        {/* Left: Theme toggle button */}
+        <button
+          className="booking-theme-toggle"
+          onClick={toggleTheme}
+          title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          aria-label="Toggle Theme"
+        >
+          <span className="toggle-symbol">{isDarkMode ? "☀️" : "🌙"}</span>
+          <span className="toggle-text">{isDarkMode ? "Light Mode" : "Dark Mode"}</span>
+        </button>
+
+        {/* Center: Clinic Portal Tag */}
+        <div className="booking-top-center-brand">
+          <Stethoscope size={15} className="brand-steth-icon" />
+          <span>MannMitra Clinical Services</span>
+        </div>
+
+        {/* Right: Profile Icon & Dropdown */}
+        <div className="booking-profile-wrapper" ref={profileDropdownRef}>
+          <button
+            className="booking-profile-trigger"
+            onClick={() => setShowProfileDropdown((prev) => !prev)}
+            title="Account Profile"
+            aria-label="Account Profile"
+          >
+            {profile?.photo_url || authUser?.photoURL ? (
+              <img
+                src={profile?.photo_url || authUser?.photoURL}
+                alt="User profile"
+                className="booking-profile-avatar"
+              />
+            ) : (
+              <div className="booking-profile-avatar-fallback">
+                <User size={18} />
+              </div>
+            )}
+          </button>
+
+          {showProfileDropdown && (
+            <div className="booking-profile-menu">
+              <div className="menu-user-info">
+                <span className="menu-user-name">
+                  {profile?.first_name 
+                    ? `${profile.first_name} ${profile.last_name || ""}` 
+                    : (authUser?.displayName || "MannMitra User")}
+                </span>
+                <span className="menu-user-email">
+                  {profile?.email || authUser?.email || "Patient Account"}
+                </span>
+              </div>
+              <div className="menu-divider" />
+              <button
+                className="menu-action-btn"
+                onClick={() => {
+                  setShowProfileDropdown(false);
+                  setShowProfileModal(true);
+                }}
+              >
+                <User size={15} /> Profile Settings
+              </button>
+              <div className="menu-divider" />
+              <button
+                className="menu-action-btn logout-btn"
+                onClick={async () => {
+                  setShowProfileDropdown(false);
+                  if (signOut) {
+                    await signOut();
+                    window.location.reload();
+                  }
+                }}
+              >
+                <LogOut size={15} /> Log Out
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="booking-container">
-        {/* Top Hero Section */}
+        {/* Top Hero Section - Professional, authentic human medical tone */}
         <header className="booking-hero">
           <div className="booking-badge">
-            <Sparkles size={14} className="badge-icon" />
-            <span>Verified Mental Health & Clinical Network</span>
+            <Stethoscope size={14} className="badge-icon" />
+            <span>MannMitra Health • Certified Clinical Practice</span>
           </div>
 
           <h1 className="hero-title">
-            Connect with <span>Top Doctors & Certified Therapists</span>
+            Consult with Licensed Psychiatrists & Clinical Psychologists
           </h1>
 
           <p className="hero-subtitle">
-            Confidential 1-on-1 video & audio consultations with licensed psychiatrists,
-            clinical psychologists, and wellness guides dedicated to your mental peace.
+            Book private, one-on-one appointments for clinical diagnosis, therapy, and psychiatric guidance.
+            Sessions are completely confidential and conducted through secure video or audio calls.
           </p>
 
           {/* Trust Value Badges */}
           <div className="hero-trust-bar">
             <div className="trust-item">
-              <ShieldCheck size={18} className="trust-icon" />
-              <span>100% Confidential & Secure</span>
+              <ShieldCheck size={17} className="trust-icon" />
+              <span>100% Private & Confidential</span>
             </div>
             <div className="trust-item">
-              <Stethoscope size={18} className="trust-icon" />
-              <span>AIIMS & NIMHANS Certified</span>
+              <Award size={17} className="trust-icon" />
+              <span>Verified Degrees (AIIMS, NIMHANS, CIP)</span>
             </div>
             <div className="trust-item">
-              <Clock size={18} className="trust-icon" />
-              <span>Instant & Same-Day Slots</span>
+              <Clock size={17} className="trust-icon" />
+              <span>Flexible 30 & 50-Min Slots</span>
             </div>
             <div className="trust-item">
-              <HeartPulse size={18} className="trust-icon" />
-              <span>Compassionate Care</span>
+              <Video size={17} className="trust-icon" />
+              <span>Encrypted Video & Audio Calls</span>
             </div>
           </div>
         </header>
@@ -1354,6 +1470,11 @@ export default function Booking({ user: propUser }) {
             )}
           </div>
         </div>
+      )}
+
+      {/* USER PROFILE MODAL */}
+      {showProfileModal && (
+        <Profile onClose={() => setShowProfileModal(false)} />
       )}
     </div>
   );
