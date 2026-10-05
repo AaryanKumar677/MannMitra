@@ -14,7 +14,7 @@ const Hero = () => {
   const parallaxRef = useRef(null);
   const navigate = useNavigate();
   const handleGetStarted = () => {
-    window.open("./src/ai-interface/MannMitra.html", "_blank");
+    navigate("/app");
   };
 
   return (

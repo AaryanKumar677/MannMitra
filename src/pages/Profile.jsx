@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { getProfile, updateProfile } from "../config/auth";
 import { useAuth } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, X, Camera, User as UserIcon, Mail, Phone, Calendar, Loader2 } from "lucide-react";
+import { LogOut, X, Camera, User as UserIcon, Loader2 } from "lucide-react";
 import { storage } from "../config/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
@@ -116,10 +116,9 @@ export default function Profile({ onClose }) {
       const { profile: updated, error } = await updateProfile(user.uid, updates, user);
       if (!error && updated) {
         setProfile(updated);
-        alert("✅ Profile updated successfully!");
         if (onClose) onClose();
       } else {
-        alert("❌ Failed to update profile");
+        alert("Failed to update profile");
       }
     }
     setSaving(false);
@@ -134,8 +133,8 @@ export default function Profile({ onClose }) {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
-        <Loader2 className="w-10 h-10 text-teal-500 animate-spin" />
+      <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
+        <Loader2 className="w-8 h-8 text-white animate-spin" />
       </div>
     );
   }
@@ -146,63 +145,59 @@ export default function Profile({ onClose }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md p-4"
       >
         <motion.div 
-          initial={{ scale: 0.95, y: 20, opacity: 0 }}
+          initial={{ scale: 0.98, y: 10, opacity: 0 }}
           animate={{ scale: 1, y: 0, opacity: 1 }}
-          exit={{ scale: 0.95, y: 20, opacity: 0 }}
-          transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="bg-n-8 border border-n-6 w-full max-w-[500px] rounded-[2rem] shadow-2xl relative overflow-hidden max-h-[90vh] overflow-y-auto custom-scrollbar"
+          exit={{ scale: 0.98, y: 10, opacity: 0 }}
+          transition={{ type: "tween", ease: "easeOut", duration: 0.2 }}
+          className="bg-[#0a0a0a] border border-white/10 w-full max-w-[480px] rounded-2xl shadow-2xl relative overflow-hidden"
         >
-          {/* Decorative blobs */}
-          <div className="absolute top-[-50px] left-[-50px] w-40 h-40 bg-teal-500/20 rounded-full mix-blend-screen filter blur-[40px] pointer-events-none"></div>
-          <div className="absolute bottom-[-50px] right-[-50px] w-40 h-40 bg-purple-500/20 rounded-full mix-blend-screen filter blur-[40px] pointer-events-none"></div>
-
-          <div className="p-8 relative z-10">
+          {/* Header */}
+          <div className="px-6 py-5 flex items-center justify-between border-b border-white/10">
+            <div>
+              <h2 className="text-xl font-semibold text-white tracking-tight">Account Settings</h2>
+              <p className="text-[#a1a1aa] text-sm mt-0.5">Manage your profile and preferences.</p>
+            </div>
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 text-n-4 hover:text-n-1 bg-n-7 hover:bg-n-6 p-2 rounded-full transition-colors"
+              className="text-[#a1a1aa] hover:text-white p-2 rounded-lg hover:bg-white/5 transition-colors"
             >
-              <X size={18} />
+              <X size={20} />
             </button>
+          </div>
 
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-extrabold bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent">
-                My Profile
-              </h2>
-              <p className="text-n-4 text-sm mt-1">Manage your account settings</p>
-            </div>
-
-            {/* Profile Picture Section */}
-            <div className="flex flex-col items-center mb-8">
-              <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                <div className="w-28 h-28 rounded-full border-4 border-n-6 overflow-hidden bg-n-7 relative">
+          <div className="p-6 overflow-y-auto max-h-[70vh] custom-scrollbar">
+            {/* Avatar Section */}
+            <div className="flex items-center gap-6 mb-8">
+              <div 
+                className="relative group cursor-pointer shrink-0" 
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <div className="w-20 h-20 rounded-full border border-white/10 overflow-hidden bg-[#18181b] relative">
                   {form.photo_url ? (
                     <img 
                       src={form.photo_url} 
-                      alt="Profile" 
+                      alt="Avatar" 
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-n-4">
-                      <UserIcon size={48} />
+                    <div className="w-full h-full flex items-center justify-center text-[#52525b]">
+                      <UserIcon size={32} />
                     </div>
                   )}
                   
-                  {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Camera className="text-white mb-1" size={24} />
-                    <span className="text-white text-xs font-medium">Change Photo</span>
+                  <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Camera className="text-white" size={20} />
                   </div>
 
                   {uploadingImage && (
                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                      <Loader2 className="w-8 h-8 text-white animate-spin" />
+                      <Loader2 className="w-6 h-6 text-white animate-spin" />
                     </div>
                   )}
                 </div>
-                
                 <input 
                   type="file" 
                   ref={fileInputRef} 
@@ -211,122 +206,105 @@ export default function Profile({ onClose }) {
                   className="hidden" 
                 />
               </div>
-              
-              <div className="mt-4 text-center">
-                <div className="flex items-center justify-center text-n-3 gap-2">
-                  <Mail size={16} />
-                  <span className="text-sm font-medium">{form.email}</span>
-                </div>
+              <div>
+                <h3 className="text-white font-medium">{form.first_name || 'User'} {form.last_name}</h3>
+                <p className="text-[#a1a1aa] text-sm">{form.email}</p>
               </div>
             </div>
 
-            <form onSubmit={handleSave} className="space-y-4">
+            <form onSubmit={handleSave} className="space-y-5">
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-n-3 uppercase tracking-wider ml-1">First Name</label>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-[#a1a1aa]">First Name</label>
                   <input
                     type="text"
                     name="first_name"
                     value={form.first_name}
                     onChange={handleChange}
-                    placeholder="First Name"
-                    className="w-full px-4 py-3 bg-n-7 border border-n-6 rounded-xl focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all outline-none text-n-1 placeholder:text-n-4"
+                    className="w-full px-3 py-2.5 bg-[#18181b] border border-white/10 rounded-lg focus:border-white/30 focus:ring-1 focus:ring-white/30 transition-all outline-none text-white text-sm"
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-n-3 uppercase tracking-wider ml-1">Last Name</label>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-[#a1a1aa]">Last Name</label>
                   <input
                     type="text"
                     name="last_name"
                     value={form.last_name}
                     onChange={handleChange}
-                    placeholder="Last Name"
-                    className="w-full px-4 py-3 bg-n-7 border border-n-6 rounded-xl focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all outline-none text-n-1 placeholder:text-n-4"
+                    className="w-full px-3 py-2.5 bg-[#18181b] border border-white/10 rounded-lg focus:border-white/30 focus:ring-1 focus:ring-white/30 transition-all outline-none text-white text-sm"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-[1fr_1.5fr] gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-n-3 uppercase tracking-wider ml-1">Age</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Calendar className="h-4 w-4 text-n-4" />
-                    </div>
-                    <input
-                      type="number"
-                      name="age"
-                      value={form.age}
-                      onChange={handleChange}
-                      placeholder="Age"
-                      className="w-full pl-9 pr-3 py-3 bg-n-7 border border-n-6 rounded-xl focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all outline-none text-n-1 placeholder:text-n-4"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-[#a1a1aa]">Age</label>
+                  <input
+                    type="number"
+                    name="age"
+                    value={form.age}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2.5 bg-[#18181b] border border-white/10 rounded-lg focus:border-white/30 focus:ring-1 focus:ring-white/30 transition-all outline-none text-white text-sm"
+                  />
                 </div>
                 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-n-3 uppercase tracking-wider ml-1">Phone</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Phone className="h-4 w-4 text-n-4" />
-                    </div>
-                    <input
-                      name="phone_number"
-                      value={form.phone_number}
-                      onChange={handleChange}
-                      placeholder="Phone Number"
-                      className="w-full pl-9 pr-3 py-3 bg-n-7 border border-n-6 rounded-xl focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all outline-none text-n-1 placeholder:text-n-4"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-[#a1a1aa]">Phone</label>
+                  <input
+                    type="text"
+                    name="phone_number"
+                    value={form.phone_number}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2.5 bg-[#18181b] border border-white/10 rounded-lg focus:border-white/30 focus:ring-1 focus:ring-white/30 transition-all outline-none text-white text-sm"
+                  />
                 </div>
               </div>
 
-              <div className="pt-4 pb-2">
+              <div className="pt-6 border-t border-white/10 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setShowLogoutConfirm(true)}
+                  className="text-sm font-medium text-red-500 hover:text-red-400 transition-colors flex items-center gap-1.5"
+                >
+                  <LogOut size={16} /> Sign out
+                </button>
+                
                 <button
                   type="submit"
                   disabled={saving}
-                  className="w-full bg-gradient-to-r from-teal-500 to-blue-600 text-white py-3.5 rounded-xl font-bold shadow-lg hover:shadow-teal-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
+                  className="bg-white text-black hover:bg-gray-200 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save Changes"}
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save changes"}
                 </button>
               </div>
             </form>
-
-            <div className="mt-4 pt-4 border-t border-n-6">
-              <button
-                onClick={() => setShowLogoutConfirm(true)}
-                className="flex items-center justify-center gap-2 w-full text-red-400 hover:text-red-300 hover:bg-red-400/10 py-3 rounded-xl transition-all font-medium"
-              >
-                <LogOut size={18} /> Sign Out
-              </button>
-            </div>
           </div>
         </motion.div>
       </motion.div>
 
       {/* Logout confirm modal */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
+            initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-n-8 border border-n-6 rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center"
+            className="bg-[#0a0a0a] border border-white/10 rounded-xl p-6 w-full max-w-[320px] shadow-2xl"
           >
-            <h3 className="text-xl font-bold text-n-1 mb-2">Sign Out</h3>
-            <p className="text-n-4 text-sm mb-6">Are you sure you want to sign out of MannMitra?</p>
+            <h3 className="text-lg font-semibold text-white mb-2">Sign out?</h3>
+            <p className="text-[#a1a1aa] text-sm mb-6">You will need to sign back in to access your account.</p>
             
             <div className="flex gap-3">
               <button
                 onClick={() => setShowLogoutConfirm(false)}
-                className="flex-1 bg-n-6 hover:bg-n-5 text-n-1 py-2.5 rounded-xl transition-colors font-medium"
+                className="flex-1 px-4 py-2 bg-[#18181b] hover:bg-[#27272a] border border-white/10 rounded-lg text-white text-sm font-medium transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleLogout}
-                className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2.5 rounded-xl transition-colors font-medium shadow-lg shadow-red-500/20"
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
               >
-                Sign Out
+                Sign out
               </button>
             </div>
           </motion.div>
