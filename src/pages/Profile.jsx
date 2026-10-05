@@ -17,7 +17,7 @@ export default function Profile({ onClose }) {
     phone_number: "",
     email: "",
   });
-
+  useEffect(() => {
     async function fetchProfile() {
       if (user) {
         setLoading(true);
