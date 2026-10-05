@@ -6,6 +6,7 @@
     background-color: #252424; /* Dark Sidebar for Light Mode */
     padding: 25px 15px;
     color: #ffffff;
+    overflow-y: auto;
 }
 
 .sidebar img {

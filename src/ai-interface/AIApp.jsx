@@ -57,10 +57,10 @@ const AIApp = () => {
   };
 
   return (
-    <div style={{ display: "flex", width: "100vw", height: "100vh", flexDirection: "column" }}>
+    <div style={{ display: "flex", width: "100vw", height: "100vh", flexDirection: "column", overflow: "hidden" }}>
       <GuestPrompt open={guestModalOpen} onClose={() => setGuestModalOpen(false)} />
 
-      <div style={{ display: "flex", flex: 1 }}>
+      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
         <Sidebar setActivePage={setActivePage} style={{ width: "250px" }} user={userForApp} />
         <div style={{ flex: 1, overflowY: "auto" }}>{renderPage()}</div>
       </div>
