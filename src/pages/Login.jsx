@@ -35,9 +35,6 @@ const Login = ({ onClose }) => {
       const { user, error } = await signIn(form.email, form.password);
       if (error) throw error;
       if (user) {
-        if (!user.emailVerified && user.providerData?.some(p => p.providerId === 'password')) {
-          throw new Error("Please verify your email first. Check your inbox for the verification link.");
-        }
         await handleAuthSuccess(user, "Logged in successfully!");
       }
     } catch (err) {

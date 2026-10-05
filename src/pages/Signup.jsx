@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, Mail, Lock, Phone, Calendar, X, Eye, EyeOff } from "lucide-react";
 import { auth } from "../config/firebase";
-import { sendEmailVerification, signOut } from "firebase/auth";
+import { signOut } from "firebase/auth";
 
 export default function Signup({ onClose }) {
   const navigate = useNavigate();
@@ -18,6 +18,7 @@ export default function Signup({ onClose }) {
     email: "",
     password: "",
     confirmPassword: "",
+    otp: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +26,8 @@ export default function Signup({ onClose }) {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
-  const [verificationSent, setVerificationSent] = useState(false);
+  
+  const [otpSent, setOtpSent] = useState(false);
 
   const handleChange = (e) => setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
 
@@ -39,16 +41,59 @@ export default function Signup({ onClose }) {
     return null;
   };
 
-  const createAccount = async (e) => {
+  const handleSendOtp = async (e) => {
     e.preventDefault();
     setErrorMsg("");
     setSuccessMsg("");
-
+    
     const v = validateForm();
     if (v) return setErrorMsg(v);
 
     setLoading(true);
     try {
+      const res = await fetch("/api/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email }),
+      });
+      const data = await res.json();
+      
+      if (!res.ok) throw new Error(data.error || "Failed to send OTP");
+
+      setOtpSent(true);
+      setSuccessMsg("📩 6-digit OTP sent to your email!");
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyAndCreateAccount = async (e) => {
+    e.preventDefault();
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    if (!form.otp || form.otp.length !== 6) {
+      return setErrorMsg("Please enter the 6-digit OTP.");
+    }
+
+    setLoading(true);
+    try {
+      // 1. Verify OTP
+      const res = await fetch("/api/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email, otp: form.otp }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Invalid OTP");
+
+      // 2. OTP is verified! Now create the actual Firebase account
+      setSuccessMsg("✅ OTP Verified! Creating account...");
+      
       const { user, error } = await signUp(
         form.email,
         form.password,
@@ -69,20 +114,12 @@ export default function Signup({ onClose }) {
         console.warn("Guest migration skipped:", err.message);
       }
 
-      // Send Firebase Email Verification Link
-      if (user) {
-        await sendEmailVerification(user);
-        await signOut(auth); // Log them out immediately so they have to verify first
-      }
-
-      setVerificationSent(true);
-      setSuccessMsg("📩 Verification link sent to your email! Please check your inbox to verify before logging in.");
-      
-      // Let the user read the message for a few seconds before just closing the modal
+      setSuccessMsg("🎉 Account created successfully! Logging you in...");
       setTimeout(() => {
         if (onClose) onClose();
         navigate("/");
-      }, 5000);
+      }, 2000);
+
     } catch (err) {
       console.error("Signup error:", err);
       if (err.message?.includes('email-already-in-use')) {
@@ -174,177 +211,200 @@ export default function Signup({ onClose }) {
               <p className="text-gray-500 text-sm">Create an account to join the community.</p>
             </div>
 
-            {verificationSent ? (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }} 
-                animate={{ opacity: 1, scale: 1 }}
-                className="text-center space-y-4 py-6"
-              >
-                <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <Mail className="w-8 h-8 text-teal-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-800">Check your email</h3>
-                <p className="text-gray-600 text-sm">
-                  We've sent a verification link to <strong>{form.email}</strong>. 
-                  Please click the link in the email to verify your account before signing in.
-                </p>
-                <p className="text-xs text-gray-400 mt-4">Redirecting to login page...</p>
-              </motion.div>
-            ) : (
-              <form onSubmit={createAccount} className="space-y-3.5">
-                
-                {/* Name Fields */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <User className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
-                    </div>
-                    <input
-                      name="firstName"
-                      value={form.firstName}
-                      onChange={handleChange}
-                      placeholder="First name"
-                      className="w-full pl-9 pr-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all outline-none shadow-sm placeholder:text-gray-400 text-gray-800"
-                      required
-                    />
-                  </div>
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <User className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
-                    </div>
-                    <input
-                      name="lastName"
-                      value={form.lastName}
-                      onChange={handleChange}
-                      placeholder="Last name"
-                      className="w-full pl-9 pr-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all outline-none shadow-sm placeholder:text-gray-400 text-gray-800"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Age & Phone */}
-                <div className="grid grid-cols-[1fr_1.5fr] gap-3">
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Calendar className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
-                    </div>
-                    <input
-                      name="age"
-                      type="number"
-                      value={form.age}
-                      onChange={handleChange}
-                      placeholder="Age"
-                      className="w-full pl-9 pr-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all outline-none shadow-sm placeholder:text-gray-400 text-gray-800"
-                    />
-                  </div>
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Phone className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
-                    </div>
-                    <input
-                      name="phone"
-                      value={form.phone}
-                      onChange={handleChange}
-                      placeholder="Phone (optional)"
-                      className="w-full pl-9 pr-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all outline-none shadow-sm placeholder:text-gray-400 text-gray-800"
-                    />
-                  </div>
-                </div>
-
-                {/* Email Only - No OTP Input */}
-                <div className="relative group w-full">
+            <form onSubmit={otpSent ? verifyAndCreateAccount : handleSendOtp} className="space-y-3.5">
+              
+              {/* Name Fields */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
+                    <User className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
                   </div>
                   <input
-                    name="email"
-                    type="email"
-                    value={form.email}
+                    name="firstName"
+                    value={form.firstName}
                     onChange={handleChange}
-                    placeholder="Email address"
-                    className="w-full pl-9 pr-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all outline-none shadow-sm placeholder:text-gray-400 text-gray-800"
+                    placeholder="First name"
+                    className="w-full pl-9 pr-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all outline-none shadow-sm placeholder:text-gray-400 text-gray-800 disabled:opacity-60"
                     required
+                    disabled={otpSent}
                   />
                 </div>
-
-                {/* Passwords */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
-                    </div>
-                    <input
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      value={form.password}
-                      onChange={handleChange}
-                      placeholder="Password"
-                      className="w-full pl-9 pr-8 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all outline-none shadow-sm placeholder:text-gray-400 text-gray-800 text-sm"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
-                    >
-                      {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
-                    </button>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
                   </div>
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
-                    </div>
-                    <input
-                      name="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      value={form.confirmPassword}
-                      onChange={handleChange}
-                      placeholder="Confirm"
-                      className="w-full pl-9 pr-8 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all outline-none shadow-sm placeholder:text-gray-400 text-gray-800 text-sm"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
-                    >
-                      {showConfirmPassword ? <EyeOff size={14} /> : <Eye size={14} />}
-                    </button>
-                  </div>
+                  <input
+                    name="lastName"
+                    value={form.lastName}
+                    onChange={handleChange}
+                    placeholder="Last name"
+                    className="w-full pl-9 pr-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all outline-none shadow-sm placeholder:text-gray-400 text-gray-800 disabled:opacity-60"
+                    required
+                    disabled={otpSent}
+                  />
                 </div>
+              </div>
+
+              {/* Age & Phone */}
+              <div className="grid grid-cols-[1fr_1.5fr] gap-3">
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Calendar className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
+                  </div>
+                  <input
+                    name="age"
+                    type="number"
+                    value={form.age}
+                    onChange={handleChange}
+                    placeholder="Age"
+                    className="w-full pl-9 pr-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all outline-none shadow-sm placeholder:text-gray-400 text-gray-800 disabled:opacity-60"
+                    disabled={otpSent}
+                  />
+                </div>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Phone className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
+                  </div>
+                  <input
+                    name="phone"
+                    value={form.phone}
+                    onChange={handleChange}
+                    placeholder="Phone (optional)"
+                    className="w-full pl-9 pr-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all outline-none shadow-sm placeholder:text-gray-400 text-gray-800 disabled:opacity-60"
+                    disabled={otpSent}
+                  />
+                </div>
+              </div>
+
+              {/* Email Only - No OTP Input */}
+              <div className="relative group w-full">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
+                </div>
+                <input
+                  name="email"
+                  type="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  placeholder="Email address"
+                  className="w-full pl-9 pr-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all outline-none shadow-sm placeholder:text-gray-400 text-gray-800 disabled:opacity-60"
+                  required
+                  disabled={otpSent}
+                />
+              </div>
+
+              {/* Passwords */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
+                  </div>
+                  <input
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    value={form.password}
+                    onChange={handleChange}
+                    placeholder="Password"
+                    className="w-full pl-9 pr-8 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all outline-none shadow-sm placeholder:text-gray-400 text-gray-800 text-sm disabled:opacity-60"
+                    required
+                    disabled={otpSent}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                  >
+                    {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
+                  </div>
+                  <input
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={form.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="Confirm"
+                    className="w-full pl-9 pr-8 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all outline-none shadow-sm placeholder:text-gray-400 text-gray-800 text-sm disabled:opacity-60"
+                    required
+                    disabled={otpSent}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                  >
+                    {showConfirmPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
+              </div>
+              
+              {!otpSent && (
                 <p className="text-[11px] text-gray-500 text-center font-medium mt-1">
                   Min 7 chars, 1 uppercase, 1 number, 1 special char
                 </p>
+              )}
 
-                {/* Status Messages */}
-                <AnimatePresence>
-                  {errorMsg && (
-                    <motion.p initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-red-500 text-sm text-center bg-red-50 py-1.5 rounded-lg border border-red-100">
-                      {errorMsg}
-                    </motion.p>
-                  )}
-                  {successMsg && (
-                    <motion.p initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-teal-600 text-sm text-center bg-teal-50 py-1.5 rounded-lg font-medium border border-teal-100">
-                      {successMsg}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-
-                {/* Submit Button - Reduced Width using mx-auto and w-10/12 */}
-                <div className="flex justify-center pt-2">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-10/12 relative overflow-hidden bg-gradient-to-r from-teal-500 to-blue-600 text-white py-3 rounded-xl font-bold shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed disabled:hover:scale-100"
+              {/* OTP Input Field - ONLY SHOWS AFTER OTP IS SENT */}
+              <AnimatePresence>
+                {otpSent && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="pt-2"
                   >
-                    {loading ? "Creating account..." : "Create Account"}
-                  </button>
-                </div>
-              </form>
-            )}
+                    <div className="relative group w-full">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Lock className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
+                      </div>
+                      <input
+                        name="otp"
+                        type="text"
+                        maxLength={6}
+                        value={form.otp}
+                        onChange={handleChange}
+                        placeholder="Enter 6-digit OTP"
+                        className="w-full pl-9 pr-3 py-3 bg-white border-2 border-teal-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all outline-none shadow-sm text-center tracking-[0.5em] text-lg font-bold text-gray-800"
+                        required
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-            {!verificationSent && (
+              {/* Status Messages */}
+              <AnimatePresence>
+                {errorMsg && (
+                  <motion.p initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-red-500 text-sm text-center bg-red-50 py-1.5 rounded-lg border border-red-100">
+                    {errorMsg}
+                  </motion.p>
+                )}
+                {successMsg && (
+                  <motion.p initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-teal-600 text-sm text-center bg-teal-50 py-1.5 rounded-lg font-medium border border-teal-100">
+                    {successMsg}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+
+              {/* Submit Button */}
+              <div className="flex justify-center pt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-10/12 relative overflow-hidden bg-gradient-to-r from-teal-500 to-blue-600 text-white py-3 rounded-xl font-bold shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed disabled:hover:scale-100"
+                >
+                  {loading 
+                    ? (otpSent ? "Verifying..." : "Sending OTP...") 
+                    : (otpSent ? "Verify & Create Account" : "Send OTP")
+                  }
+                </button>
+              </div>
+            </form>
+
+            {!otpSent && (
               <>
                 <div className="mt-5 mb-5 relative flex items-center justify-center">
                   <div className="absolute inset-0 flex items-center">

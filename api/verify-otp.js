@@ -1,71 +1,56 @@
-// api/verify-otp.js
-import { createClient } from "@supabase/supabase-js";
+import { initializeApp } from "firebase/app";
+import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const firebaseConfig = {
+  apiKey: process.env.VITE_FIREBASE_API_KEY || "AIzaSyDeUtKIvBXeuvcIWeJet-iGnQj0MosdwxY",
+  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN || "mannmitra-1.firebaseapp.com",
+  projectId: process.env.VITE_FIREBASE_PROJECT_ID || "mannmitra-1",
+  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET || "mannmitra-1.firebasestorage.app",
+  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "453995153947",
+  appId: process.env.VITE_FIREBASE_APP_ID || "1:453995153947:web:7a805f4fd807e9829ec6be"
+};
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ success: false, error: "Method not allowed" });
+    return res.status(405).json({ error: "Method Not Allowed" });
+  }
+
+  const { email, otp } = req.body;
+  if (!email || !otp) {
+    return res.status(400).json({ error: "Email and OTP are required" });
   }
 
   try {
-    const { email, code } = req.body || {};
-    if (!email || !code) {
-      return res.status(400).json({ success: false, error: "Email and code required" });
+    const otpDocRef = doc(db, "email_otps", email);
+    const otpDoc = await getDoc(otpDocRef);
+
+    if (!otpDoc.exists()) {
+      return res.status(400).json({ error: "OTP not found or expired. Please request a new one." });
     }
 
-    // Fetch recent OTP rows for this email (get a few to be safe)
-    const { data, error: fetchErr } = await supabase
-      .from("email_otps")
-      .select("*")
-      .eq("email", email)
-      .order("created_at", { ascending: false })
-      .limit(5);
+    const data = otpDoc.data();
 
-    if (fetchErr) {
-      console.error("verify-otp DB fetch error:", fetchErr);
-      return res.status(500).json({ success: false, error: "DB error" });
+    // Check expiry
+    const now = new Date();
+    const expiryDate = new Date(data.expiresAt);
+    if (now > expiryDate) {
+      return res.status(400).json({ error: "OTP has expired. Please request a new one." });
     }
 
-    if (!data || data.length === 0) {
-      return res.status(400).json({ success: false, error: "Invalid code" });
+    // Check match
+    if (data.otp !== otp) {
+      return res.status(400).json({ error: "Invalid OTP. Please try again." });
     }
 
-    // find a row that matches code AND is not used (used === true should be ignored)
-    const matching = data.find((r) => String(r.code) === String(code) && (r.used !== true));
+    // Mark as verified (optional, you can also delete the document)
+    await updateDoc(otpDocRef, { verified: true });
 
-    if (!matching) {
-      return res.status(400).json({ success: false, error: "Invalid or already used code" });
-    }
-
-    // expiry check
-    if (matching.expires_at && new Date(matching.expires_at) < new Date()) {
-      // optionally delete expired row
-      try {
-        await supabase.from("email_otps").delete().eq("id", matching.id);
-      } catch (delErr) {
-        console.warn("Failed to delete expired OTP:", delErr);
-      }
-      return res.status(400).json({ success: false, error: "Code expired" });
-    }
-
-    // mark as used (preferred) so it can't be reused
-    const { error: updErr } = await supabase
-      .from("email_otps")
-      .update({ used: true })
-      .eq("id", matching.id);
-
-    if (updErr) {
-      console.warn("Could not mark OTP used:", updErr);
-      // Not fatal — continue and return success (or you may return 500 if you prefer)
-    }
-
-    return res.status(200).json({ success: true, message: "OTP verified" });
-  } catch (err) {
-    console.error("verify-otp error:", err);
-    return res.status(500).json({ success: false, error: err.message || "Server error" });
+    return res.status(200).json({ success: true, message: "Email verified successfully" });
+  } catch (error) {
+    console.error("Error in verify-otp:", error);
+    return res.status(500).json({ error: "Failed to verify OTP", details: error.message });
   }
 }

@@ -1,90 +1,72 @@
-// api/send-otp.js
+import { initializeApp } from "firebase/app";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 import nodemailer from "nodemailer";
-import { createClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+const firebaseConfig = {
+  apiKey: process.env.VITE_FIREBASE_API_KEY || "AIzaSyDeUtKIvBXeuvcIWeJet-iGnQj0MosdwxY",
+  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN || "mannmitra-1.firebaseapp.com",
+  projectId: process.env.VITE_FIREBASE_PROJECT_ID || "mannmitra-1",
+  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET || "mannmitra-1.firebasestorage.app",
+  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "453995153947",
+  appId: process.env.VITE_FIREBASE_APP_ID || "1:453995153947:web:7a805f4fd807e9829ec6be"
+};
 
-function generateOTP() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ success: false, error: "Method not allowed" });
+    return res.status(405).json({ error: "Method Not Allowed" });
+  }
+
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
   }
 
   try {
-    const { email } = req.body || {};
-    if (!email) return res.status(400).json({ success: false, error: "Email required" });
+    // Generate a 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // --- server-side cooldown: check recent OTP sent in last 60s ---
-    const { data: recent, error: recentErr } = await supabase
-      .from("email_otps")
-      .select("created_at")
-      .eq("email", email)
-      .order("created_at", { ascending: false })
-      .limit(1);
+    // Store OTP in Firestore (temporary collection 'email_otps')
+    // Expiry time: 10 minutes from now
+    const expiryDate = new Date(Date.now() + 10 * 60000).toISOString();
+    await setDoc(doc(db, "email_otps", email), {
+      otp: otp,
+      expiresAt: expiryDate,
+      verified: false
+    });
 
-    if (recentErr) {
-      console.warn("recent query warning:", recentErr);
-    } else if (recent && recent.length > 0) {
-      const last = new Date(recent[0].created_at);
-      if (Date.now() - last.getTime() < 60 * 1000) {
-        return res.status(429).json({ success: false, error: "Please wait before requesting a new OTP" });
-      }
-    }
-
-    const code = generateOTP();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-
-    // insert OTP
-    const { data: insertData, error: insertErr } = await supabase
-      .from("email_otps")
-      .insert([{ email, code, expires_at: expiresAt }])
-      .select(); // return inserted row(s)
-
-    if (insertErr) {
-      console.error("DB insert error:", insertErr);
-      return res.status(500).json({ success: false, error: "DB insert failed" });
-    }
-
-    // Configure transporter (change secure according to your SMTP port)
+    // Configure Nodemailer
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT || 587),
-      secure: Number(process.env.SMTP_PORT) === 465,
+      service: "gmail",
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user: process.env.SMTP_USER, // Will be read from .env
+        pass: process.env.SMTP_PASS  // Will be read from .env
       },
     });
 
-    // send email
-    try {
-      await transporter.sendMail({
-        from: `"MannMitra" <${process.env.SMTP_USER}>`,
-        to: email,
-        subject: "Your MannMitra verification code",
-        text: `Your verification code is ${code}. It expires in 10 minutes.`,
-        html: `<p>Your verification code is <strong>${code}</strong>. It expires in 10 minutes.</p>`,
-      });
-    } catch (mailErr) {
-      console.error("Mail send error:", mailErr);
-      // rollback DB insert if mail fails
-      try {
-        await supabase.from("email_otps").delete().eq("email", email).eq("code", code);
-      } catch (delErr) {
-        console.warn("rollback delete failed:", delErr);
-      }
-      return res.status(500).json({ success: false, error: "Failed to send email" });
-    }
+    // Send the email
+    const mailOptions = {
+      from: `"MannMitra Support" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: "Your Verification Code for MannMitra",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+          <h2 style="color: #0d9488; text-align: center;">Welcome to MannMitra!</h2>
+          <p>Please use the following 6-digit verification code to complete your registration.</p>
+          <div style="background-color: #f0fdfa; padding: 15px; text-align: center; border-radius: 8px; margin: 20px 0;">
+            <h1 style="color: #0f766e; letter-spacing: 5px; margin: 0;">${otp}</h1>
+          </div>
+          <p style="color: #666; font-size: 13px; text-align: center;">This code will expire in 10 minutes.</p>
+        </div>
+      `,
+    };
 
-    // success
-    return res.status(200).json({ success: true, message: "OTP sent" });
-  } catch (err) {
-    console.error("send-otp error:", err);
-    return res.status(500).json({ success: false, error: err.message || "Server error" });
+    await transporter.sendMail(mailOptions);
+    return res.status(200).json({ success: true, message: "OTP sent successfully" });
+  } catch (error) {
+    console.error("Error in send-otp:", error);
+    return res.status(500).json({ error: "Failed to send OTP", details: error.message });
   }
 }
