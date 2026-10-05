@@ -78,11 +78,11 @@ export default function Signup({ onClose }) {
       setVerificationSent(true);
       setSuccessMsg("📩 Verification link sent to your email! Please check your inbox to verify before logging in.");
       
-      // Let the user read the message for 6 seconds before redirecting
+      // Let the user read the message for a few seconds before just closing the modal
       setTimeout(() => {
         if (onClose) onClose();
-        navigate("/login");
-      }, 6000);
+        navigate("/");
+      }, 5000);
     } catch (err) {
       console.error("Signup error:", err);
       if (err.message?.includes('email-already-in-use')) {
