@@ -23,6 +23,7 @@ const Header = () => {
   const [showLogin, setShowLogin] = useState(false);
   
   const [showProfile, setShowProfile] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const { user, profile } = useAuth();
 
@@ -83,7 +84,7 @@ const Header = () => {
           </nav>
 
           {/* Right side container - Fixed width to prevent layout shift when logging in */}
-          <div className="hidden lg:flex items-center justify-end w-[18rem]">
+          <div className="hidden lg:flex items-center justify-end w-[18rem] relative">
             {!user ? (
               <>
                 <button
@@ -98,13 +99,55 @@ const Header = () => {
                 </Button>
               </>
             ) : (
-              <button
-                onClick={() => setShowProfile(true)}
-                className="text-white hover:text-teal-300 w-10 h-10 flex items-center justify-center rounded-full bg-n-7 transition-colors"
-                title="Profile"
-              >
-                <User size={24} />
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setShowDropdown((prev) => !prev)}
+                  className="w-10 h-10 rounded-full border-2 border-transparent hover:border-teal-500 transition-all overflow-hidden bg-n-7 flex items-center justify-center cursor-pointer"
+                  title="Account menu"
+                  id="profile-menu-button"
+                >
+                  {profile?.photo_url || user?.photoURL ? (
+                    <img 
+                      src={profile?.photo_url || user?.photoURL} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User size={20} className="text-n-1" />
+                  )}
+                </button>
+                
+                {/* Dropdown Menu */}
+                {showDropdown && (
+                  <div className="absolute top-12 right-0 w-48 bg-n-8 border border-n-6 rounded-xl shadow-2xl py-2 z-50 animate-fade-in">
+                    <button
+                      onClick={() => {
+                        setShowDropdown(false);
+                        setShowProfile(true);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-n-1 hover:bg-n-7 transition-colors flex items-center gap-2"
+                    >
+                      <User size={16} /> Profile Settings
+                    </button>
+                    <div className="w-full h-px bg-n-6 my-1"></div>
+                    <button
+                      onClick={async () => {
+                        setShowDropdown(false);
+                        try {
+                          // The `signOut` function comes from useAuth() context at the top
+                          await signOut();
+                          window.location.reload();
+                        } catch (e) {
+                          console.error(e);
+                        }
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-n-7 transition-colors flex items-center gap-2"
+                    >
+                      Log out
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
 

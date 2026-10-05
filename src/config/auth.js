@@ -1,5 +1,5 @@
 import { auth, db } from "../config/firebase";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile as firebaseUpdateProfile } from "firebase/auth";
 import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 
 export async function signUp({ email, password, firstName, lastName, age, mobile }) {
@@ -55,10 +55,17 @@ export async function getProfile(userId) {
   }
 }
 
-export async function updateProfile(userId, updates) {
+export async function updateProfile(userId, updates, currentUser = null) {
   try {
     const docRef = doc(db, "profiles", userId);
     await updateDoc(docRef, updates);
+    
+    if (currentUser && updates.photo_url) {
+      await firebaseUpdateProfile(currentUser, {
+        photoURL: updates.photo_url
+      });
+    }
+
     const docSnap = await getDoc(docRef);
 
     return { profile: docSnap.data() };
