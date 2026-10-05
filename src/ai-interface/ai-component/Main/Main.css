@@ -13,6 +13,7 @@
     font-size: 22px;
     padding: 25px;
     color: #585858;
+    background-color: #f5f5f5; /* Light grey header for Light Mode */
 }
 
 .main .nav img{
@@ -60,13 +61,13 @@
 .card {
     height: 200px;
     padding: 15px;
-    background-color: #f0f4f9;
+    background-color: #fff9c4; /* Yellow for light mode */
     border-radius: 10px;
     position: relative;
     cursor: pointer;
 }
 .card:hover {
-    background-color: #dfe4ea;
+    background-color: #fff59d;
 }
 .card p {
     color: #585858;
@@ -470,6 +471,18 @@
 .dark-mode .nav {
     background-color: #2d2d2d;
     color: #ffffff;
+}
+
+.dark-mode .card {
+    background-color: #2d2d2d;
+}
+
+.dark-mode .card:hover {
+    background-color: #3d3d3d;
+}
+
+.dark-mode .card p {
+    color: #e5e7eb;
 }
 
 .dark-mode .greet {
