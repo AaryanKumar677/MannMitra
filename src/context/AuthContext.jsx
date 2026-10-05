@@ -41,8 +41,10 @@ export const AuthProvider = ({ children }) => {
       
       if (newUser) {
         if (!newUser.emailVerified && newUser.providerData?.some(p => p.providerId === 'password')) {
-          console.warn("User email not verified. Logging out.");
-          await firebaseSignOut(auth);
+          console.warn("User email not verified. Ignoring auth state temporarily.");
+          // We DO NOT call firebaseSignOut here because it would interrupt the signup flow
+          // which needs the user token to write to Firestore and send the verification email.
+          // The Signup component will manually call signOut() once it's done.
           setUser(null);
           setProfile(null);
           setLoading(false);
