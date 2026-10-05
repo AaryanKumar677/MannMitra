@@ -82,30 +82,31 @@ const Header = () => {
             <HamburgerMenu />
           </nav>
 
-          {!user ? (
-            <>
-              <button
-                onClick={() => setShowSignup(true)}
-                className="button hidden mr-8 text-n-1/50 transition-colors hover:text-n-1 lg:block"
-              >
-                New account
-              </button>
+          {/* Right side container - Fixed width to prevent layout shift when logging in */}
+          <div className="hidden lg:flex items-center justify-end w-[18rem]">
+            {!user ? (
+              <>
+                <button
+                  onClick={() => setShowSignup(true)}
+                  className="button mr-8 text-n-1/50 transition-colors hover:text-n-1"
+                >
+                  New account
+                </button>
 
-              <Button
-                className="hidden lg:flex"
-                onClick={() => setShowLogin(true)}
+                <Button onClick={() => setShowLogin(true)}>
+                  Sign in
+                </Button>
+              </>
+            ) : (
+              <button
+                onClick={() => setShowProfile(true)}
+                className="text-white hover:text-teal-300 w-10 h-10 flex items-center justify-center rounded-full bg-n-7 transition-colors"
+                title="Profile"
               >
-                Sign in
-              </Button>
-            </>
-          ) : (
-            <button
-              onClick={() => setShowProfile(true)}
-              className="hidden lg:flex text-white hover:text-teal-300"
-            >
-              <User size={24} />
-            </button>
-          )}
+                <User size={24} />
+              </button>
+            )}
+          </div>
 
           <Button
             className="ml-auto lg:hidden"
