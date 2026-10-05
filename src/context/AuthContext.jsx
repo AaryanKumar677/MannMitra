@@ -38,11 +38,21 @@ export const AuthProvider = ({ children }) => {
     console.log("🔵 AuthProvider: useEffect init");
     const unsubscribe = onAuthStateChanged(auth, async (newUser) => {
       console.log("🔵 AuthProvider: onAuthStateChange ->", newUser);
-      setUser(newUser);
-
+      
       if (newUser) {
+        if (!newUser.emailVerified && newUser.providerData?.some(p => p.providerId === 'password')) {
+          console.warn("User email not verified. Logging out.");
+          await firebaseSignOut(auth);
+          setUser(null);
+          setProfile(null);
+          setLoading(false);
+          return;
+        }
+
+        setUser(newUser);
         await refreshProfile(newUser.uid);
       } else {
+        setUser(null);
         setProfile(null);
       }
       setLoading(false);
