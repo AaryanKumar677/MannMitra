@@ -112,7 +112,7 @@
 .mm-welcome-logo-badge {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 6px 16px;
@@ -121,10 +121,10 @@
 }
 
 .mm-welcome-logo-icon {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
-  filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.6));
+  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5));
 }
 
 .mm-welcome-logo-name {

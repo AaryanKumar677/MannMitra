@@ -1,5 +1,5 @@
 import React from "react";
-import { MannMitraicon, MannMitraname } from "../../../assets";
+import { MannMitraBrainLogo, MannMitraname } from "../../../assets";
 import {
   Heart,
   Shield,
@@ -32,7 +32,7 @@ export default function NewUserWelcomeModal({ isOpen, onClose, userName = "Frien
         {/* Brand Header with Logo */}
         <div className="mm-welcome-header">
           <div className="mm-welcome-logo-badge">
-            <img src={MannMitraicon} alt="MannMitra" className="mm-welcome-logo-icon" />
+            <img src={MannMitraBrainLogo} alt="MannMitra" className="mm-welcome-logo-icon" />
             <img src={MannMitraname} alt="MannMitra" className="mm-welcome-logo-name" />
           </div>
 

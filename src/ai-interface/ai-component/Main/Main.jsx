@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect, useRef } from 'react'
 import '../Main/Main.css'
 import { assets } from '../../../assets/assets'
-import MannMitraicon from "../../../assets/MannMitraicon.png"
+import MannMitraBrainLogo from "../../../assets/MannMitraBrainLogo.png"
 import { Context } from '../../context/Context'
 import MarkdownIt from "markdown-it";
 
@@ -119,9 +119,9 @@ const Main = ({ user, onOpenSettings }) => {
   return (
     <div className='main'>
       <div className="nav">
-        <div style={{ display: "flex", alignItems: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
           <img
-            src={MannMitraicon}
+            src={MannMitraBrainLogo}
             alt="MannMitra Brain"
             style={{ width: "48px", height: "48px", objectFit: "contain", borderRadius: 0, flexShrink: 0 }}
           />
@@ -129,7 +129,7 @@ const Main = ({ user, onOpenSettings }) => {
             src={assets.MannMitraname}
             alt="MannMitra"
             className="MannMitraname"
-            style={{ marginLeft: "-8px" }}
+            style={{ marginLeft: "-2px" }}
           />
         </div>
         <img

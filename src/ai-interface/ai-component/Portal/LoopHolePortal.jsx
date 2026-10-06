@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { MannMitraicon, MannMitraname } from "../../../assets";
+import { MannMitraBrainLogo, MannMitraname } from "../../../assets";
 import { Volume2, VolumeX, Sparkles } from "lucide-react";
 import "./LoopHolePortal.css";
 
@@ -287,7 +287,7 @@ export default function LoopHolePortal({ onComplete, duration = 4000 }) {
           {/* Glowing Emblem in Center */}
           <div className="mm-portal-emblem-wrap">
             <img
-              src={MannMitraicon}
+              src={MannMitraBrainLogo}
               alt="MannMitra"
               className="mm-portal-logo-icon"
             />

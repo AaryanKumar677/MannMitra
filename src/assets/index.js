@@ -2,6 +2,7 @@ import MannMitra from "./MannMitra1.png";
 import check from "./check.svg";
 import MannMitraname from "./MannMitraname.png";
 import MannMitraicon from "./MannMitraicon.png";
+import MannMitraBrainLogo from "./MannMitraBrainLogo.png";
 import MannMitrawhiteicon from "./MannMitrawhiteicon.png";
 import play from "./play.svg";
 import gradient from "./gradient.png";
@@ -75,6 +76,7 @@ export {
   loading1,
   MannMitraname,
   MannMitraicon,
+  MannMitraBrainLogo,
   MannMitrawhiteicon,
   play,
   gradient,

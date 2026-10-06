@@ -25,7 +25,7 @@ import {
   Sparkles,
   Upload
 } from "lucide-react";
-import MannMitraicon from "../../../assets/MannMitraicon.png";
+import MannMitraBrainLogo from "../../../assets/MannMitraBrainLogo.png";
 import { useAuth } from "../../../context/AuthContext";
 import { Context } from "../../context/Context";
 import { updateProfile, deleteAccount, getProfile } from "../../../config/auth";
@@ -473,7 +473,7 @@ export default function SettingsPage({ initialSection = "account", onBack, onTri
       <div className="mm-settings-page-header">
         <div className="mm-header-brand-group">
           {/* User's Official Brain Logo - Direct without box */}
-          <img src={MannMitraicon} alt="MannMitra Brain" className="mm-brain-logo-clean" />
+          <img src={MannMitraBrainLogo} alt="MannMitra Brain" className="mm-brain-logo-clean" />
 
           <div>
             <h1 className="mm-settings-page-title">MannMitra Settings & Preferences</h1>
