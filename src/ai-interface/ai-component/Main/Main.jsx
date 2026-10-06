@@ -4,7 +4,7 @@ import { assets } from '../../../assets/assets'
 import { Context } from '../../context/Context'
 import MarkdownIt from "markdown-it";
 
-const Main = () => {
+const Main = ({ user, onOpenSettings }) => {
   const { conversations, currentChatId, onSent, setInput, input, loading, showResult } = useContext(Context);
   const currentChat = conversations.find(chat => chat.id === currentChatId);
   const currentMessages = currentChat ? currentChat.messages : [];

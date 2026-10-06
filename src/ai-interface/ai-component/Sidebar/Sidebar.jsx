@@ -3,12 +3,21 @@ import '../Sidebar/Sidebar.css'
 import { assets } from '../../../assets/assets'
 import { Context } from '../../context/Context';
 
-const Sidebar = ({ activePage, setActivePage }) => {
+const Sidebar = ({ activePage, setActivePage, onOpenSettings }) => {
     const [extended, setExtended] = useState(false);
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     const { conversations, setCurrentChatId, newChat, isLightMode } = useContext(Context);
     
     const [isMobile, setIsMobile] = useState(false);
+
+    const handleOpenSettings = (tab = "account") => {
+        if (onOpenSettings) {
+            onOpenSettings(tab);
+        }
+        if (isMobile) {
+            closeMobileSidebar();
+        }
+    };
     
     useEffect(() => {
         const checkMobile = () => {
@@ -143,17 +152,17 @@ const Sidebar = ({ activePage, setActivePage }) => {
                 </div>
             
                 <div className="bottom">
-                    {/* Old Items */}
-                    <div className="bottom-item recent-entry">
-                        <img src={assets.question_icon} alt="" />
+                    {/* Bottom Actions */}
+                    <div className="bottom-item recent-entry" onClick={() => handleOpenSettings("helplines")}>
+                        <img src={assets.question_icon} alt="Help" />
                         {extended ? <p>Help</p> : null}
                     </div>
-                    <div className="bottom-item recent-entry">
-                        <img src={assets.history_icon} alt="" />
+                    <div className="bottom-item recent-entry" onClick={() => handleOpenSettings("privacy")}>
+                        <img src={assets.history_icon} alt="Activity" />
                         {extended ? <p>Activity</p> : null}
                     </div>
-                    <div className="bottom-item recent-entry">
-                        <img src={assets.setting_icon} alt="" />
+                    <div className="bottom-item recent-entry" onClick={() => handleOpenSettings("account")}>
+                        <img src={assets.setting_icon} alt="Settings" />
                         {extended ? <p>Settings</p> : null}
                     </div>
                 </div>
