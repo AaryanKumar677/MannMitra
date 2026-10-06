@@ -6,14 +6,16 @@ import { navigation } from "../constants";
 import Button from "./Button";
 import MenuSvg from "../assets/svg/MenuSvg";
 import { HamburgerMenu } from "./design/Header";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 
 import Signup from "../pages/Signup";
 import Login from "../pages/Login";
 import Profile from "../pages/Profile";
 import { useAuth } from "../context/AuthContext";
-import { User } from "lucide-react";
+import { User, LogOut } from "lucide-react";
+import { auth } from "../config/firebase";
+import { signOut as firebaseSignOut } from "firebase/auth";
 
 const Header = () => {
   const pathname = useLocation();
@@ -24,8 +26,46 @@ const Header = () => {
   
   const [showProfile, setShowProfile] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
 
-  const { user, profile } = useAuth();
+  const { user, profile, signOut } = useAuth();
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showDropdown]);
+
+  const handleLogout = async () => {
+    setShowDropdown(false);
+    try {
+      if (signOut) {
+        await signOut();
+      } else {
+        await firebaseSignOut(auth);
+      }
+      localStorage.removeItem("mann_guest");
+      window.location.reload();
+    } catch (e) {
+      console.error("Logout error:", e);
+      try {
+        await firebaseSignOut(auth);
+      } catch (err) {
+        console.error("Fallback logout error:", err);
+      }
+      localStorage.removeItem("mann_guest");
+      window.location.reload();
+    }
+  };
 
   const toggleNavigation = () => {
     if (openNavigation) {
@@ -99,7 +139,7 @@ const Header = () => {
                 </Button>
               </>
             ) : (
-              <div className="relative">
+              <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowDropdown((prev) => !prev)}
                   className="w-10 h-10 rounded-full border-2 border-transparent hover:border-teal-500 transition-all overflow-hidden bg-n-7 flex items-center justify-center cursor-pointer"
@@ -125,25 +165,16 @@ const Header = () => {
                         setShowDropdown(false);
                         setShowProfile(true);
                       }}
-                      className="w-full text-left px-4 py-2 text-sm text-n-1 hover:bg-n-7 transition-colors flex items-center gap-2"
+                      className="w-full text-left px-4 py-2 text-sm text-n-1 hover:bg-n-7 transition-colors flex items-center gap-2 cursor-pointer"
                     >
                       <User size={16} /> Profile Settings
                     </button>
                     <div className="w-full h-px bg-n-6 my-1"></div>
                     <button
-                      onClick={async () => {
-                        setShowDropdown(false);
-                        try {
-                          // The `signOut` function comes from useAuth() context at the top
-                          await signOut();
-                          window.location.reload();
-                        } catch (e) {
-                          console.error(e);
-                        }
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-n-7 transition-colors flex items-center gap-2"
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-n-7 transition-colors flex items-center gap-2 cursor-pointer"
                     >
-                      Log out
+                      <LogOut size={16} /> Log out
                     </button>
                   </div>
                 )}
