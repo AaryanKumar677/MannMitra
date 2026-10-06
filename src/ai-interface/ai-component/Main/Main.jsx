@@ -119,8 +119,12 @@ const Main = ({ user, onOpenSettings }) => {
   return (
     <div className='main'>
       <div className="nav">
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <img src={MannMitraicon} alt="MannMitra Brain" style={{ width: "32px", height: "32px", objectFit: "contain" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+          <img
+            src={MannMitraicon}
+            alt="MannMitra Brain"
+            style={{ width: "40px", height: "40px", objectFit: "contain", borderRadius: 0, flexShrink: 0 }}
+          />
           <img src={assets.MannMitraname} alt="MannMitra" className="MannMitraname" />
         </div>
         <img
