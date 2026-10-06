@@ -14,9 +14,15 @@ const Footer = () => {
           {/* Brand & Purpose (Col 1: Spans 5 columns on desktop) */}
           <div className="lg:col-span-5 flex flex-col items-start gap-5">
             <a href="#hero" className="block">
-              <img src={MannMitra} width={180} height={38} alt="MannMitra" className="object-contain" />
+              <img
+                src={MannMitra}
+                width={235}
+                height={48}
+                alt="MannMitra"
+                className="w-[14.5rem] h-auto object-contain"
+              />
             </a>
-            <p className="body-2 text-n-3 max-w-sm leading-relaxed">
+            <p className="body-2 text-n-3 max-w-xl leading-relaxed">
               Empowering mental wellness with empathetic AI companion conversations, 
               confidential emotional sanctuary, and guided self-care reflections.
             </p>

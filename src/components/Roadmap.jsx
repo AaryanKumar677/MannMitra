@@ -7,11 +7,11 @@ import { check2, grid, loading1 } from "../assets";
 import { Gradient } from "./design/Roadmap";
 
 const Roadmap = () => (
-  <Section className="overflow-hidden" id="roadmap">
-    <div className="container md:pb-10">
+  <Section className="overflow-hidden !pb-6 lg:!pb-8 xl:!pb-10" id="roadmap">
+    <div className="container">
       <Heading tag="Ready to get started" title="What we’re working on" />
 
-      <div className="relative grid gap-6 md:grid-cols-2 md:gap-4 md:pb-[7rem]">
+      <div className="relative grid gap-6 md:grid-cols-2 md:gap-4 md:pb-2">
         {roadmap.map((item) => {
           const status = item.status === "done" ? "Done" : "In progress";
 
@@ -68,7 +68,7 @@ const Roadmap = () => (
         <Gradient />
       </div>
 
-      <div className="flex justify-center mt-12 md:mt-15 xl:mt-20">
+      <div className="flex justify-center mt-4 md:mt-6 xl:mt-8">
         <Button href="/roadmap">Our roadmap</Button>
       </div>
     </div>
