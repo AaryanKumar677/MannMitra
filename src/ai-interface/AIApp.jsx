@@ -132,9 +132,9 @@ const AIApp = () => {
 
   return (
     <div style={{ display: "flex", width: "100vw", height: "100vh", flexDirection: "column", overflow: "hidden" }}>
-      {/* 3-Second Cosmic Loop Hole Wormhole Portal */}
+      {/* 4-Second Cosmic Loop Hole Wormhole Portal */}
       {showPortal && (
-        <LoopHolePortal onComplete={handlePortalComplete} duration={3000} />
+        <LoopHolePortal onComplete={handlePortalComplete} duration={4000} />
       )}
 
       {/* New User Registration Note Popup */}

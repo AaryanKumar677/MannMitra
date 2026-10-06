@@ -3,15 +3,17 @@ import { MannMitraicon, MannMitraname } from "../../../assets";
 import { Volume2, VolumeX, Sparkles } from "lucide-react";
 import "./LoopHolePortal.css";
 
-export default function LoopHolePortal({ onComplete, duration = 3000 }) {
+export default function LoopHolePortal({ onComplete, duration = 4000 }) {
   const canvasRef = useRef(null);
-  const [progress, setProgress] = useState(0);
+  const progressBarRef = useRef(null);
+  const percentTextRef = useRef(null);
+  const lastStatusRef = useRef(0);
   const [statusText, setStatusText] = useState("Initializing Quantum Mind Space...");
   const [isMuted, setIsMuted] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
   const audioContextRef = useRef(null);
 
-  // Play ambient cosmic synthesizer frequency ramp
+  // Play ambient cosmic synthesizer frequency ramp with boosted volume
   useEffect(() => {
     if (isMuted) return;
     try {
@@ -20,29 +22,47 @@ export default function LoopHolePortal({ onComplete, duration = 3000 }) {
       const ctx = new AudioCtx();
       audioContextRef.current = ctx;
 
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
+      // Master Gain - Louder, cinematic and rich
+      const masterGain = ctx.createGain();
+      masterGain.gain.setValueAtTime(0.01, ctx.currentTime);
+      masterGain.gain.linearRampToValueAtTime(0.65, ctx.currentTime + 0.6); // Boosted volume (was 0.18)
+      masterGain.gain.setValueAtTime(0.65, ctx.currentTime + 3.4);
+      masterGain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 3.98);
+      masterGain.connect(ctx.destination);
+
+      // Primary Solfeggio / Healing Frequency sweep
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = "sine";
+      osc1.frequency.setValueAtTime(110, ctx.currentTime);
+      osc1.frequency.exponentialRampToValueAtTime(432, ctx.currentTime + 2.8);
+      osc1.frequency.exponentialRampToValueAtTime(528, ctx.currentTime + 3.8);
+      gain1.gain.value = 0.75;
+
+      // Warm Sub-Harmonic Drone for physical sonic presence
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = "triangle";
+      osc2.frequency.setValueAtTime(75, ctx.currentTime);
+      osc2.frequency.exponentialRampToValueAtTime(220, ctx.currentTime + 3.2);
+      gain2.gain.value = 0.55;
+
+      // Dynamic Resonant Filter for cosmic warp swoosh
       const filter = ctx.createBiquadFilter();
-
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(110, ctx.currentTime); // Low soothing A2
-      osc.frequency.exponentialRampToValueAtTime(432, ctx.currentTime + 2.4); // 432Hz Healing Frequency
-      osc.frequency.exponentialRampToValueAtTime(528, ctx.currentTime + 2.9); // 528Hz Solfeggio
-
       filter.type = "lowpass";
-      filter.frequency.setValueAtTime(300, ctx.currentTime);
-      filter.frequency.exponentialRampToValueAtTime(1800, ctx.currentTime + 2.6);
+      filter.frequency.setValueAtTime(320, ctx.currentTime);
+      filter.frequency.exponentialRampToValueAtTime(2500, ctx.currentTime + 3.3);
 
-      gain.gain.setValueAtTime(0.001, ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 0.8);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 3.0);
+      osc1.connect(gain1);
+      osc2.connect(gain2);
+      gain1.connect(filter);
+      gain2.connect(filter);
+      filter.connect(masterGain);
 
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start();
-      osc.stop(ctx.currentTime + 3.1);
+      osc1.start();
+      osc2.start();
+      osc1.stop(ctx.currentTime + 4.02);
+      osc2.stop(ctx.currentTime + 4.02);
     } catch (e) {
       // Audio autoplay policy fallback
     }
@@ -56,7 +76,7 @@ export default function LoopHolePortal({ onComplete, duration = 3000 }) {
     };
   }, [isMuted]);
 
-  // Main 3-second Canvas Particle Vortex & Wormhole
+  // Main 4-second Canvas Particle Vortex & Wormhole
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -91,18 +111,36 @@ export default function LoopHolePortal({ onComplete, duration = 3000 }) {
     const render = (currentTime) => {
       const elapsed = currentTime - startTime;
       const t = Math.min(elapsed / duration, 1);
+      const pct = Math.min(100, t * 100);
 
-      // Smooth progress update
-      setProgress(Math.round(t * 100));
+      // Direct DOM progress update for buttery-smooth 60fps rendering without React hitching
+      if (progressBarRef.current) {
+        progressBarRef.current.style.width = `${pct}%`;
+      }
+      if (percentTextRef.current) {
+        percentTextRef.current.innerText = `${Math.round(pct)}%`;
+      }
 
-      if (t < 0.35) {
-        setStatusText("Aligning Neural Frequencies...");
-      } else if (t < 0.75) {
-        setStatusText("Bending Continuum • Opening Safe Haven...");
-      } else if (t < 0.95) {
-        setStatusText("Synchronizing Sanctuary • Welcome to MannMitra");
+      if (t < 0.28) {
+        if (lastStatusRef.current !== 1) {
+          lastStatusRef.current = 1;
+          setStatusText("Aligning Neural Frequencies...");
+        }
+      } else if (t < 0.65) {
+        if (lastStatusRef.current !== 2) {
+          lastStatusRef.current = 2;
+          setStatusText("Bending Continuum • Opening Safe Haven...");
+        }
+      } else if (t < 0.92) {
+        if (lastStatusRef.current !== 3) {
+          lastStatusRef.current = 3;
+          setStatusText("Synchronizing Sanctuary • Welcome to MannMitra");
+        }
       } else {
-        setStatusText("Entering Sanctuary...");
+        if (lastStatusRef.current !== 4) {
+          lastStatusRef.current = 4;
+          setStatusText("Entering Sanctuary...");
+        }
       }
 
       // Background fade trail for warp blur
@@ -272,12 +310,12 @@ export default function LoopHolePortal({ onComplete, duration = 3000 }) {
 
           {/* Progress Bar */}
           <div className="mm-hud-bar-wrap">
-            <div className="mm-hud-bar" style={{ width: `${progress}%` }} />
+            <div ref={progressBarRef} className="mm-hud-bar" style={{ width: "0%" }} />
           </div>
 
           <div className="mm-hud-percentage">
             <span>WARP SEQUENCE</span>
-            <strong>{progress}%</strong>
+            <strong ref={percentTextRef}>0%</strong>
           </div>
         </div>
       </div>
