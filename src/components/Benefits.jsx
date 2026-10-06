@@ -7,7 +7,7 @@ import ClipPath from "../assets/svg/ClipPath";
 
 const Benefits = () => {
   return (
-    <Section id="features">
+    <Section id="features" className="!pt-6 lg:!pt-10 xl:!pt-12">
       <div className="container relative z-2">
         <Heading
           className="md:max-w-md lg:max-w-2xl"

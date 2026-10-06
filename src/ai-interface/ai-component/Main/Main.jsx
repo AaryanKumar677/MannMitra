@@ -119,7 +119,7 @@ const Main = ({ user, onOpenSettings }) => {
   return (
     <div className='main'>
       <div className="nav">
-        <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
           <img
             src={MannMitraBrainLogo}
             alt="MannMitra Brain"
@@ -129,7 +129,6 @@ const Main = ({ user, onOpenSettings }) => {
             src={assets.MannMitraname}
             alt="MannMitra"
             className="MannMitraname"
-            style={{ marginLeft: "-2px" }}
           />
         </div>
         <img
