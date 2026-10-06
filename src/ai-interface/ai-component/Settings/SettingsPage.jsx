@@ -17,7 +17,6 @@ import {
   Save,
   LogOut,
   Camera,
-  ArrowLeft,
   CheckCircle2,
   X,
   Wind,
@@ -473,17 +472,8 @@ export default function SettingsPage({ initialSection = "account", onBack, onTri
       {/* TOP HEADER (Minimalist Black with User's Brain Logo) */}
       <div className="mm-settings-page-header">
         <div className="mm-header-brand-group">
-          {onBack && (
-            <button onClick={onBack} className="mm-btn-back" title="Back to Chatbot">
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Chat</span>
-            </button>
-          )}
-
-          {/* User's Official Brain Logo */}
-          <div className="mm-brain-logo-wrap">
-            <img src={MannMitraicon} alt="MannMitra Brain" className="mm-brain-logo-img" />
-          </div>
+          {/* User's Official Brain Logo - Direct without box */}
+          <img src={MannMitraicon} alt="MannMitra Brain" className="mm-brain-logo-clean" />
 
           <div>
             <h1 className="mm-settings-page-title">MannMitra Settings & Preferences</h1>

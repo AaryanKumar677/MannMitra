@@ -63,42 +63,14 @@
   gap: 16px;
 }
 
-.mm-btn-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #a1a1aa;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 12.5px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.mm-btn-back:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-}
-
-/* User's Official Brain Logo */
-.mm-brain-logo-wrap {
+/* User's Official Brain Logo - Clean with no box or border */
+.mm-brain-logo-clean {
   width: 36px;
   height: 36px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.mm-brain-logo-img {
-  width: 28px;
-  height: 28px;
   object-fit: contain;
+  display: block;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
 }
 
 .mm-settings-page-title {
@@ -286,15 +258,19 @@
 .mm-settings-main-pane {
   flex: 1;
   background: #0d0d0f;
-  padding: 32px 48px;
+  padding: 32px 64px 60px 72px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .mm-section-content {
-  max-width: 720px;
+  max-width: 980px;
+  width: 100%;
+  margin-left: 28px;
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 24px;
 }
 
 .mm-content-title-bar {
@@ -783,12 +759,25 @@
 }
 
 /* Responsive adjustments */
+@media (max-width: 1024px) {
+  .mm-settings-main-pane {
+    padding: 28px 36px 48px 36px;
+  }
+  .mm-section-content {
+    margin-left: 0;
+    max-width: 100%;
+  }
+}
+
 @media (max-width: 820px) {
   .mm-settings-nav-sidebar {
     width: 210px;
   }
   .mm-settings-main-pane {
     padding: 24px;
+  }
+  .mm-section-content {
+    margin-left: 0;
   }
   .mm-form-row-2,
   .mm-form-row-3 {
