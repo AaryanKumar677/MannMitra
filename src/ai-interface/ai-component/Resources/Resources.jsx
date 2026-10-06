@@ -356,7 +356,7 @@ const concernFilterList = [
   "Emotional Regulation"
 ];
 
-export default function Resources({ user: propUser }) {
+export default function Resources({ user: propUser, onOpenSettings }) {
   const authContext = useAuth();
   const authUser = authContext?.user || propUser;
   const profile = authContext?.profile;
@@ -583,7 +583,11 @@ export default function Resources({ user: propUser }) {
                 className="menu-action-btn"
                 onClick={() => {
                   setShowProfileDropdown(false);
-                  setShowProfileModal(true);
+                  if (onOpenSettings) {
+                    onOpenSettings("account");
+                  } else {
+                    setShowProfileModal(true);
+                  }
                 }}
               >
                 <User size={15} /> Profile Settings

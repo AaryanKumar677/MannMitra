@@ -296,7 +296,7 @@ const timeSlots = [
   { label: "Evening", slots: ["06:00 PM", "07:15 PM", "08:30 PM"] }
 ];
 
-export default function Booking({ user: propUser }) {
+export default function Booking({ user: propUser, onOpenSettings }) {
   const authContext = useAuth();
   const authUser = authContext?.user || propUser;
   const profile = authContext?.profile;
@@ -588,7 +588,11 @@ export default function Booking({ user: propUser }) {
                 className="menu-action-btn"
                 onClick={() => {
                   setShowProfileDropdown(false);
-                  setShowProfileModal(true);
+                  if (onOpenSettings) {
+                    onOpenSettings("account");
+                  } else {
+                    setShowProfileModal(true);
+                  }
                 }}
               >
                 <User size={15} /> Profile Settings

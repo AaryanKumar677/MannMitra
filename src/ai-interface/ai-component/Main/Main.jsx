@@ -119,7 +119,13 @@ const Main = ({ user, onOpenSettings }) => {
     <div className='main'>
       <div className="nav">
         <img src={assets.MannMitraname} alt="MannMitra" className="MannMitraname" />
-        <img src={assets.user_icon} alt="" />
+        <img
+          src={assets.user_icon}
+          alt="Profile & Settings"
+          style={{ cursor: "pointer" }}
+          title="Profile & Settings"
+          onClick={() => onOpenSettings?.("account")}
+        />
       </div>
       <div className="main-container">
         {currentMessages.length > 0 ? (
