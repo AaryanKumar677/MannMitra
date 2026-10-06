@@ -3,7 +3,7 @@ import '../Sidebar/Sidebar.css'
 import { assets } from '../../../assets/assets'
 import { Context } from '../../context/Context';
 
-const Sidebar = ({ setActivePage }) => {
+const Sidebar = ({ activePage, setActivePage }) => {
     const [extended, setExtended] = useState(false);
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     const { conversations, setCurrentChatId, newChat, isLightMode } = useContext(Context);
@@ -118,13 +118,14 @@ const Sidebar = ({ setActivePage }) => {
                         </div> */}
                     </div>
 
-                    
-                    <div onClick={handleNewChat} className="new-chat">
-                        <img src={assets.plus_icon} alt="" />
-                        {extended ? <p>New Chat</p> : null}
-                    </div>
+                    {activePage === "chat" && (
+                        <div onClick={handleNewChat} className="new-chat">
+                            <img src={assets.plus_icon} alt="" />
+                            {extended ? <p>New Chat</p> : null}
+                        </div>
+                    )}
 
-                    {extended && (
+                    {extended && activePage === "chat" && (
                         <div className="recent">
                             <p className='recent-title'>Recent Chat</p>
                             {conversations.map(chat => (

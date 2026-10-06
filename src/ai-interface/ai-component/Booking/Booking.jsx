@@ -611,7 +611,6 @@ export default function Booking({ user: propUser }) {
           )}
         </div>
       </div>
-
       <div className="booking-container">
         {/* Top Hero Section - Professional, authentic human medical tone */}
         <header className="booking-hero">

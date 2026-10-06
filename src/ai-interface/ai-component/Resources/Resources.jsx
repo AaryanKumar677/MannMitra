@@ -606,7 +606,6 @@ export default function Resources({ user: propUser }) {
           )}
         </div>
       </div>
-
       <div className="resources-container">
         {/* HERO SECTION - Authentic, clinically validated human tone */}
         <header className="resources-hero">
