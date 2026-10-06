@@ -8,6 +8,11 @@ import {
   disc02,
   discord,
   discordBlack,
+  facebook,
+  instagram,
+  linkedin,
+  twitter,
+  youtube,
   figma,
   file02,
   framer,
@@ -284,8 +289,36 @@ export const socials = [
     id: "0",
     title: "Discord",
     iconUrl: discordBlack,
-    url: "#",
+    url: "https://discord.com",
   },
-
-
+  {
+    id: "1",
+    title: "Twitter",
+    iconUrl: twitter,
+    url: "https://twitter.com",
+  },
+  {
+    id: "2",
+    title: "Instagram",
+    iconUrl: instagram,
+    url: "https://instagram.com",
+  },
+  {
+    id: "3",
+    title: "LinkedIn",
+    iconUrl: linkedin,
+    url: "https://linkedin.com",
+  },
+  {
+    id: "4",
+    title: "YouTube",
+    iconUrl: youtube,
+    url: "https://youtube.com",
+  },
+  {
+    id: "5",
+    title: "Facebook",
+    iconUrl: facebook,
+    url: "https://facebook.com",
+  },
 ];

@@ -68,6 +68,11 @@ import benefitIcon4 from "./benefits/icon-4.svg";
 import benefitImage2 from "./benefits/image-2.png";
 
 import discordBlack from "./socials/discord.svg";
+import instagram from "./socials/instagram.svg";
+import linkedin from "./socials/linkedin.svg";
+import youtube from "./socials/youtube.svg";
+import facebook from "./socials/facebook.svg";
+import twitter from "./socials/twitter.svg";
 
 export {
   MannMitra,
@@ -132,4 +137,9 @@ export {
   benefitIcon4,
   benefitImage2,
   discordBlack,
+  instagram,
+  linkedin,
+  youtube,
+  facebook,
+  twitter,
 };
