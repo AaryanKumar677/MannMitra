@@ -542,7 +542,6 @@ export default function Booking({ user: propUser }) {
           aria-label="Toggle Theme"
         >
           <span className="toggle-symbol">{isDarkMode ? "☀️" : "🌙"}</span>
-          <span className="toggle-text">{isDarkMode ? "Light Mode" : "Dark Mode"}</span>
         </button>
 
         {/* Center: Clinic Portal Tag */}

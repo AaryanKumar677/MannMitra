@@ -111,29 +111,22 @@ body.dark-mode .booking-page,
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--booking-tag-bg);
-  border: 1px solid var(--booking-tag-border);
+  background: transparent;
+  border: none;
   color: var(--booking-text-main);
-  padding: 7px 14px;
+  padding: 5px;
   border-radius: 10px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 24px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .booking-theme-toggle:hover {
-  border-color: #6366f1;
   background: rgba(99, 102, 241, 0.1);
 }
 
 .toggle-symbol {
-  font-size: 15px;
-}
-
-.toggle-text {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 24px;
 }
 
 /* Center: Clinical Hub Tag */

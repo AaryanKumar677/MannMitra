@@ -116,19 +116,17 @@ body.dark-mode .resources-hub-page,
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--res-tag-bg);
-  border: 1px solid var(--res-tag-border);
+  background: transparent;
+  border: none;
   color: var(--res-text-main);
-  padding: 7px 14px;
+  padding: 5px;
   border-radius: 10px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 24px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .resources-theme-toggle:hover {
-  border-color: #6366f1;
   background: rgba(99, 102, 241, 0.1);
 }
 

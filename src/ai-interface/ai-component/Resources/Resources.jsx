@@ -537,7 +537,6 @@ export default function Resources({ user: propUser }) {
           aria-label="Toggle Theme"
         >
           <span className="toggle-symbol">{isDarkMode ? "☀️" : "🌙"}</span>
-          <span className="toggle-text">{isDarkMode ? "Light Mode" : "Dark Mode"}</span>
         </button>
 
         {/* Center: Clinical Hub Tag */}
