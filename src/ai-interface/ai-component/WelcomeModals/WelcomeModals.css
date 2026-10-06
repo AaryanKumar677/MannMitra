@@ -1,0 +1,407 @@
+/* ==========================================================================
+   MANNMITRA WELCOME & ONBOARDING MODALS
+   ========================================================================== */
+
+.mm-welcome-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99990;
+  background-color: rgba(5, 6, 12, 0.8);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: mmModalOverlayFade 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes mmModalOverlayFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal Card */
+.mm-welcome-card {
+  position: relative;
+  width: 100%;
+  max-width: 580px;
+  background: #0e1017;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  padding: 32px 36px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  color: #e4e4e7;
+  overflow: hidden;
+  animation: mmCardScaleUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes mmCardScaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Top Glow Orbs */
+.mm-card-glow-orb {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+  height: 160px;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.mm-card-glow-orb.emerald {
+  background: radial-gradient(circle, #10b981 0%, rgba(6, 182, 212, 0.3) 70%, transparent 100%);
+}
+
+.mm-card-glow-orb.purple {
+  background: radial-gradient(circle, #8b5cf6 0%, rgba(139, 92, 246, 0.3) 70%, transparent 100%);
+}
+
+/* Close Button */
+.mm-modal-close-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  z-index: 10;
+}
+
+.mm-modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: scale(1.05);
+}
+
+/* Header & Branding */
+.mm-welcome-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  z-index: 2;
+}
+
+.mm-welcome-logo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 6px 16px;
+  border-radius: 30px;
+  backdrop-filter: blur(8px);
+}
+
+.mm-welcome-logo-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.6));
+}
+
+.mm-welcome-logo-name {
+  height: 22px;
+  object-fit: contain;
+}
+
+.mm-safe-haven-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+.mm-safe-haven-tag.back {
+  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.12);
+  border-color: rgba(139, 92, 246, 0.25);
+}
+
+.mm-welcome-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.mm-highlight-name {
+  background: linear-gradient(135deg, #34d399, #38bdf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.welcome-back .mm-highlight-name {
+  background: linear-gradient(135deg, #a78bfa, #38bdf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.mm-welcome-subtitle {
+  font-size: 13px;
+  color: #a1a1aa;
+  max-width: 460px;
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* Core Pillars Grid */
+.mm-pillars-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 2;
+}
+
+.mm-pillar-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 12px 16px;
+  border-radius: 14px;
+  transition: all 0.2s ease;
+}
+
+.mm-pillar-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(16, 185, 129, 0.3);
+  transform: translateX(2px);
+}
+
+.mm-pillar-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mm-pillar-icon.bot {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.mm-pillar-icon.shield {
+  background: rgba(20, 184, 166, 0.15);
+  border: 1px solid rgba(20, 184, 166, 0.3);
+}
+
+.mm-pillar-icon.calendar {
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.mm-pillar-text h4 {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #f4f4f5;
+  margin: 0;
+}
+
+.mm-pillar-text p {
+  font-size: 11.5px;
+  color: #94a3b8;
+  margin: 3px 0 0 0;
+  line-height: 1.35;
+}
+
+/* Mindfulness Breath Banner */
+.mm-breath-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 14px;
+  padding: 12px 16px;
+  z-index: 2;
+}
+
+.mm-breath-banner strong {
+  font-size: 12px;
+  color: #34d399;
+  display: block;
+}
+
+.mm-breath-banner p {
+  font-size: 11px;
+  color: #cbd5e1;
+  margin: 2px 0 0 0;
+}
+
+/* Mood Check-In (Welcome Back) */
+.mm-mood-checkin-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 2;
+}
+
+.mm-mood-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.mm-mood-selected-tag {
+  font-size: 10px;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+  padding: 1px 6px;
+  border-radius: 6px;
+}
+
+.mm-mood-pills-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mm-mood-pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 8px 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s ease;
+}
+
+.mm-mood-pill:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.mm-mood-pill.selected {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: #8b5cf6;
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.25);
+}
+
+.mm-mood-emoji {
+  font-size: 18px;
+}
+
+.mm-mood-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.mm-thought-quote {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(244, 63, 94, 0.06);
+  border: 1px solid rgba(244, 63, 94, 0.2);
+  border-radius: 12px;
+  padding: 10px 14px;
+  z-index: 2;
+}
+
+.mm-thought-quote p {
+  font-size: 11px;
+  font-style: italic;
+  color: #fda4af;
+  margin: 0;
+}
+
+/* Actions */
+.mm-welcome-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  margin-top: 4px;
+}
+
+.mm-welcome-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(16, 185, 129, 0.4);
+  transition: all 0.2s ease;
+}
+
+.mm-welcome-cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(16, 185, 129, 0.55);
+}
+
+.mm-welcome-cta-btn.purple {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  box-shadow: 0 4px 18px rgba(139, 92, 246, 0.4);
+}
+
+.mm-welcome-cta-btn.purple:hover {
+  box-shadow: 0 6px 24px rgba(139, 92, 246, 0.55);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .mm-welcome-card {
+    padding: 24px 20px;
+    border-radius: 18px;
+  }
+
+  .mm-welcome-title {
+    font-size: 19px;
+  }
+
+  .mm-pillar-item {
+    padding: 10px 12px;
+  }
+}

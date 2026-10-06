@@ -23,6 +23,15 @@ const Login = ({ onClose }) => {
     } catch (e) {
       console.warn("Migration failed:", e);
     }
+
+    // Set Welcome Back trigger ONLY upon completing login
+    sessionStorage.setItem("mann_auth_event", "welcome_back");
+    const bestName = user?.displayName
+      ? user.displayName.split(" ")[0]
+      : (form.email ? form.email.split("@")[0] : "Friend");
+    sessionStorage.setItem("mann_user_name", bestName);
+    sessionStorage.setItem("mann_trigger_portal", "true");
+
     if (onClose) onClose();
     navigate("/app");
   };

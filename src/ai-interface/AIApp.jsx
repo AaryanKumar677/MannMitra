@@ -4,6 +4,9 @@ import Main from "../ai-interface/ai-component/Main/Main";
 import Booking from "./ai-component/Booking/Booking";
 import Resources from "./ai-component/Resources/Resources";
 import SettingsModal from "./ai-component/Settings/SettingsModal";
+import LoopHolePortal from "./ai-component/Portal/LoopHolePortal";
+import NewUserWelcomeModal from "./ai-component/WelcomeModals/NewUserWelcomeModal";
+import WelcomeBackModal from "./ai-component/WelcomeModals/WelcomeBackModal";
 import { useAuth } from "../context/AuthContext";
 import { Context } from "../ai-interface/context/Context";
 import GuestPrompt from "../components/GuestPrompt";
@@ -18,6 +21,14 @@ const AIApp = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState("account");
 
+  // Loop Hole (Wormhole) and Welcome Modals State
+  const [showPortal, setShowPortal] = useState(() => {
+    return sessionStorage.getItem("mann_trigger_portal") === "true";
+  });
+  const [showNewUserModal, setShowNewUserModal] = useState(false);
+  const [showWelcomeBackModal, setShowWelcomeBackModal] = useState(false);
+  const [welcomeUserName, setWelcomeUserName] = useState("Friend");
+
   const handleOpenSettings = (tab = "account") => {
     setSettingsTab(tab);
     setSettingsOpen(true);
@@ -29,6 +40,53 @@ const AIApp = () => {
 
   // only pull what you need from Context to avoid unused warnings
   const { conversations, onSent } = useContext(Context);
+
+  useEffect(() => {
+    const triggerPortal = sessionStorage.getItem("mann_trigger_portal");
+    const authEvent = sessionStorage.getItem("mann_auth_event");
+    const storedName = sessionStorage.getItem("mann_user_name");
+
+    if (storedName) {
+      setWelcomeUserName(storedName);
+    } else if (authUser?.displayName) {
+      setWelcomeUserName(authUser.displayName.split(" ")[0]);
+    } else if (authUser?.email) {
+      setWelcomeUserName(authUser.email.split("@")[0]);
+    }
+
+    if (triggerPortal === "true") {
+      setShowPortal(true);
+      sessionStorage.removeItem("mann_trigger_portal");
+    } else if (authEvent === "new_registration") {
+      setShowNewUserModal(true);
+      sessionStorage.removeItem("mann_auth_event");
+      sessionStorage.removeItem("mann_user_name");
+    } else if (authEvent === "welcome_back") {
+      setShowWelcomeBackModal(true);
+      sessionStorage.removeItem("mann_auth_event");
+      sessionStorage.removeItem("mann_user_name");
+    }
+  }, [authUser]);
+
+  const handlePortalComplete = () => {
+    setShowPortal(false);
+    const authEvent = sessionStorage.getItem("mann_auth_event");
+    const storedName = sessionStorage.getItem("mann_user_name");
+
+    if (storedName) {
+      setWelcomeUserName(storedName);
+    }
+
+    if (authEvent === "new_registration") {
+      setShowNewUserModal(true);
+    } else if (authEvent === "welcome_back") {
+      setShowWelcomeBackModal(true);
+    }
+
+    // Clean up flags so they never re-trigger on routine reload or tab switch
+    sessionStorage.removeItem("mann_auth_event");
+    sessionStorage.removeItem("mann_user_name");
+  };
 
   useEffect(() => {
     const guestFlag = localStorage.getItem("mann_guest");
@@ -66,12 +124,34 @@ const AIApp = () => {
 
   return (
     <div style={{ display: "flex", width: "100vw", height: "100vh", flexDirection: "column", overflow: "hidden" }}>
+      {/* 3-Second Cosmic Loop Hole Wormhole Portal */}
+      {showPortal && (
+        <LoopHolePortal onComplete={handlePortalComplete} duration={3000} />
+      )}
+
+      {/* New User Registration Note Popup */}
+      <NewUserWelcomeModal
+        isOpen={showNewUserModal}
+        onClose={() => setShowNewUserModal(false)}
+        userName={welcomeUserName}
+      />
+
+      {/* Returning User Welcome Back Popup */}
+      <WelcomeBackModal
+        isOpen={showWelcomeBackModal}
+        onClose={() => setShowWelcomeBackModal(false)}
+        userName={welcomeUserName}
+      />
+
       <GuestPrompt open={guestModalOpen} onClose={() => setGuestModalOpen(false)} />
 
       <SettingsModal
         isOpen={settingsOpen}
         onClose={() => setSettingsOpen(false)}
         initialSection={settingsTab}
+        onTriggerPortal={() => setShowPortal(true)}
+        onTriggerNewUserModal={() => setShowNewUserModal(true)}
+        onTriggerWelcomeBackModal={() => setShowWelcomeBackModal(true)}
       />
 
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>

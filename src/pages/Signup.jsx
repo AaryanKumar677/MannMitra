@@ -114,11 +114,14 @@ export default function Signup({ onClose }) {
         console.warn("Guest migration skipped:", err.message);
       }
 
-      setSuccessMsg("🎉 Account created successfully! Logging you in...");
+      setSuccessMsg("🎉 Account created successfully! Launching sanctuary...");
+      sessionStorage.setItem("mann_auth_event", "new_registration");
+      sessionStorage.setItem("mann_user_name", form.firstName || "Friend");
+      sessionStorage.setItem("mann_trigger_portal", "true");
       setTimeout(() => {
         if (onClose) onClose();
-        navigate("/");
-      }, 2000);
+        navigate("/app");
+      }, 1200);
 
     } catch (err) {
       console.error("Signup error:", err);
@@ -145,9 +148,13 @@ export default function Signup({ onClose }) {
           await migrateGuestConversations(user.uid);
         } catch (e) {}
         setSuccessMsg("🎉 Logged in with Gmail!");
+        sessionStorage.setItem("mann_auth_event", "new_registration");
+        const gName = user.displayName ? user.displayName.split(" ")[0] : "Friend";
+        sessionStorage.setItem("mann_user_name", gName);
+        sessionStorage.setItem("mann_trigger_portal", "true");
         setTimeout(() => {
           if (onClose) onClose();
-          navigate("/");
+          navigate("/app");
         }, 900);
       }
     } catch (err) {

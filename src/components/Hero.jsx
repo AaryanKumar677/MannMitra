@@ -14,6 +14,7 @@ const Hero = () => {
   const parallaxRef = useRef(null);
   const navigate = useNavigate();
   const handleGetStarted = () => {
+    sessionStorage.setItem("mann_trigger_portal", "true");
     navigate("/app");
   };
 

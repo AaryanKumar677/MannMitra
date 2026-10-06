@@ -99,7 +99,14 @@ const SETTINGS_SECTIONS = [
   }
 ];
 
-export default function SettingsModal({ isOpen, onClose, initialSection = "account" }) {
+export default function SettingsModal({
+  isOpen,
+  onClose,
+  initialSection = "account",
+  onTriggerPortal,
+  onTriggerNewUserModal,
+  onTriggerWelcomeBackModal
+}) {
   const { user, profile: authProfile, signOut } = useAuth() || {};
   const { conversations, setConversations, setCurrentChatId } = useContext(Context) || {};
 
@@ -1196,6 +1203,49 @@ export default function SettingsModal({ isOpen, onClose, initialSection = "accou
                       />
                       <span className="mm-slider round"></span>
                     </label>
+                  </div>
+                </div>
+
+                {/* 3-Second Loop Hole Wormhole Preview & Modals Test */}
+                <div className="mm-card">
+                  <h4>Cosmic Loop Hole Portal & Welcome Animations</h4>
+                  <p className="text-zinc-400 text-xs mb-3">
+                    Experience the 3-second quantum wormhole portal transition and onboarding greetings:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        if (onTriggerPortal) onTriggerPortal();
+                      }}
+                      className="mm-btn-secondary"
+                    >
+                      <Sparkles className="w-4 h-4 text-emerald-400" />
+                      <span>Play 3s Loop Hole Portal</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        if (onTriggerNewUserModal) onTriggerNewUserModal();
+                      }}
+                      className="mm-btn-secondary"
+                    >
+                      <span>Preview New User Note</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        if (onTriggerWelcomeBackModal) onTriggerWelcomeBackModal();
+                      }}
+                      className="mm-btn-secondary"
+                    >
+                      <span>Preview Welcome Back</span>
+                    </button>
                   </div>
                 </div>
 
