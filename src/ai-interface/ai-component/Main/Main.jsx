@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect, useRef } from 'react'
 import '../Main/Main.css'
 import { assets } from '../../../assets/assets'
+import MannMitraicon from "../../../assets/MannMitraicon.png"
 import { Context } from '../../context/Context'
 import MarkdownIt from "markdown-it";
 
@@ -118,7 +119,10 @@ const Main = ({ user, onOpenSettings }) => {
   return (
     <div className='main'>
       <div className="nav">
-        <img src={assets.MannMitraname} alt="MannMitra" className="MannMitraname" />
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <img src={MannMitraicon} alt="MannMitra Brain" style={{ width: "32px", height: "32px", objectFit: "contain" }} />
+          <img src={assets.MannMitraname} alt="MannMitra" className="MannMitraname" />
+        </div>
         <img
           src={assets.user_icon}
           alt="Profile & Settings"

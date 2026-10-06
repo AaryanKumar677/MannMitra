@@ -14,6 +14,7 @@ const Sidebar = ({ activePage, setActivePage, onOpenSettings }) => {
         if (onOpenSettings) {
             onOpenSettings(tab);
         }
+        setActivePage("settings");
         if (isMobile) {
             closeMobileSidebar();
         }
@@ -161,7 +162,7 @@ const Sidebar = ({ activePage, setActivePage, onOpenSettings }) => {
                         <img src={assets.history_icon} alt="Activity" />
                         {extended ? <p>Activity</p> : null}
                     </div>
-                    <div className="bottom-item recent-entry" onClick={() => handleOpenSettings("account")}>
+                    <div className={`bottom-item recent-entry ${activePage === "settings" ? "active" : ""}`} onClick={() => handleOpenSettings("account")}>
                         <img src={assets.setting_icon} alt="Settings" />
                         {extended ? <p>Settings</p> : null}
                     </div>

@@ -3,7 +3,7 @@ import Sidebar from "../ai-interface/ai-component/Sidebar/Sidebar";
 import Main from "../ai-interface/ai-component/Main/Main";
 import Booking from "./ai-component/Booking/Booking";
 import Resources from "./ai-component/Resources/Resources";
-import SettingsModal from "./ai-component/Settings/SettingsModal";
+import SettingsPage from "./ai-component/Settings/SettingsPage";
 import LoopHolePortal from "./ai-component/Portal/LoopHolePortal";
 import NewUserWelcomeModal from "./ai-component/WelcomeModals/NewUserWelcomeModal";
 import WelcomeBackModal from "./ai-component/WelcomeModals/WelcomeBackModal";
@@ -18,7 +18,6 @@ const CommunityPage = React.lazy(() =>
 const AIApp = () => {
   const [activePage, setActivePage] = useState("chat");
   const [guestModalOpen, setGuestModalOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState("account");
 
   // Loop Hole (Wormhole) and Welcome Modals State
@@ -31,7 +30,7 @@ const AIApp = () => {
 
   const handleOpenSettings = (tab = "account") => {
     setSettingsTab(tab);
-    setSettingsOpen(true);
+    setActivePage("settings");
   };
 
   const authCtx = useAuth();
@@ -117,6 +116,15 @@ const AIApp = () => {
             <CommunityPage user={userForApp} onOpenSettings={handleOpenSettings} />
           </Suspense>
         );
+      case "settings":
+        return (
+          <SettingsPage
+            initialSection={settingsTab}
+            user={userForApp}
+            onBack={() => setActivePage("chat")}
+            onTriggerPortal={() => setShowPortal(true)}
+          />
+        );
       default:
         return <Main user={userForApp} onOpenSettings={handleOpenSettings} />;
     }
@@ -144,15 +152,6 @@ const AIApp = () => {
       />
 
       <GuestPrompt open={guestModalOpen} onClose={() => setGuestModalOpen(false)} />
-
-      <SettingsModal
-        isOpen={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        initialSection={settingsTab}
-        onTriggerPortal={() => setShowPortal(true)}
-        onTriggerNewUserModal={() => setShowNewUserModal(true)}
-        onTriggerWelcomeBackModal={() => setShowWelcomeBackModal(true)}
-      />
 
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
         <Sidebar

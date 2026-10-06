@@ -1,6 +1,11 @@
 import { auth, db } from "../config/firebase";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile as firebaseUpdateProfile } from "firebase/auth";
-import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile as firebaseUpdateProfile,
+  deleteUser
+} from "firebase/auth";
+import { doc, setDoc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 
 export async function signUp({ email, password, firstName, lastName, age, mobile }) {
   try {
@@ -71,6 +76,23 @@ export async function updateProfile(userId, updates, currentUser = null) {
     return { profile: docSnap.data() };
   } catch (error) {
     console.error("Update profile error:", error.message);
+    return { error };
+  }
+}
+
+export async function deleteAccount(currentUser) {
+  try {
+    if (!currentUser) return { error: new Error("No authenticated user to delete") };
+    const uid = currentUser.uid;
+    try {
+      await deleteDoc(doc(db, "profiles", uid));
+    } catch (e) {
+      console.warn("Firestore profile deletion warning:", e.message);
+    }
+    await deleteUser(currentUser);
+    return { success: true };
+  } catch (error) {
+    console.error("Delete account error:", error.message);
     return { error };
   }
 }
