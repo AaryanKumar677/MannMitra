@@ -70,7 +70,7 @@ const Main = ({ user, onOpenSettings }) => {
     return () => {
       isMounted = false;
     };
-  }, [currentMessages]);
+  }, [currentMessages, loading]);
 
   // Enter key handler function
   const handleKeyPress = (e) => {
@@ -140,7 +140,7 @@ const Main = ({ user, onOpenSettings }) => {
         />
       </div>
       <div className="main-container">
-        {currentMessages.length > 0 ? (
+        {currentMessages.length > 0 || loading ? (
           <div className="result"
               ref={resultRef}
               onScroll={checkScroll}>
@@ -154,26 +154,30 @@ const Main = ({ user, onOpenSettings }) => {
                 return (
                   <div key={index} className={msg.type === 'user' ? 'user-message-box' : 'ai-message-box'}>
                     <img src={msg.type === 'user' ? assets.user_icon : assets.gemini_icon} alt="" />
-                      <div className="message">
-                      {msg.type === 'ai' && loading && index === currentMessages.length - 1 ? (
-                        <div className="loader">
-                          <hr className="animated-bg" />
-                          <hr className="animated-bg" />
-                          <hr className="animated-bg" />
-                        </div>
-                      ) : (
-                        msg.text && (
-                          <div
-                            className="message-text"
-                            dangerouslySetInnerHTML={{ __html: md.render(cleanText) }}
-                          ></div>
-                        )
+                    <div className="message">
+                      {msg.text && (
+                        <div
+                          className="message-text"
+                          dangerouslySetInnerHTML={{ __html: md.render(cleanText) }}
+                        ></div>
                       )}
                       {msg.image && <img src={msg.image} alt="sent" />}
                     </div>
                   </div>
                 );
               })}
+              {loading && (
+                <div className="ai-message-box">
+                  <img src={assets.gemini_icon} alt="" />
+                  <div className="message" style={{ width: "100%" }}>
+                    <div className="loader">
+                      <hr className="animated-bg" />
+                      <hr className="animated-bg" />
+                      <hr className="animated-bg" />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             ) : (
               <>
