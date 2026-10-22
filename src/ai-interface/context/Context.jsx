@@ -48,26 +48,11 @@ const ContextProvider = (props) => {
     const onSent = async (prompt, imageFile = null) => {
         let finalPrompt = prompt !== undefined ? prompt : input;
 
-        const chatId = currentChatId || Date.now().toString();
-        if (!currentChatId) {
-            setCurrentChatId(chatId);
-            setConversations(prev => [
-            ...prev,
-            { 
-                id: chatId, 
-                title: finalPrompt.slice(0, 20), 
-                messages: [
-                { 
-                    type: "ai", 
-                    text: "👋 Hello! I’m MannMitra, your AI friend and assistant. How can I help you today?", 
-                    timestamp: new Date().toLocaleTimeString(), 
-                    chatId 
-                }
-                ] 
-            }
-            ]);
+        let activeChatId = currentChatId;
+        if (!activeChatId) {
+            activeChatId = Date.now().toString();
+            setCurrentChatId(activeChatId);
         }
-    
         
         if (finalPrompt.includes("exam stress") || finalPrompt.includes("exam anxiety")) {
             finalPrompt = "Provide specific techniques for managing exam stress and test anxiety. Include study strategies, relaxation techniques during exams, and mindset tips. Focus on practical actionable advice.";
@@ -84,12 +69,11 @@ const ContextProvider = (props) => {
 
         const crisisStatus = checkForCrisis(finalPrompt);
         const userMessage = {
-
             type: "user",
             text: finalPrompt,
             image: imageFile ? URL.createObjectURL(imageFile) : null,
             timestamp: new Date().toLocaleTimeString(),
-            chatId: chatId,
+            chatId: activeChatId,
         };
 
         if (crisisStatus === "CRISIS_ALERT") {
@@ -107,14 +91,18 @@ const ContextProvider = (props) => {
                 </div>
             `;
 
-            setConversations((prev) =>
-                prev.map((chat) =>
-                chat.id === chatId
-                    ? { ...chat, messages: [...chat.messages, userMessage, { type: "ai", text: crisisResponse, timestamp: new Date().toLocaleTimeString(), chatId }] }
-                    : chat
-                )
-            );
-            
+            setConversations((prev) => {
+                const exists = prev.some((c) => c.id === activeChatId);
+                const newAiMsg = { type: "ai", text: crisisResponse, timestamp: new Date().toLocaleTimeString(), chatId: activeChatId };
+                if (!exists) {
+                    return [...prev, { id: activeChatId, title: finalPrompt.slice(0, 20), messages: [userMessage, newAiMsg] }];
+                }
+                return prev.map((chat) =>
+                    chat.id === activeChatId
+                        ? { ...chat, messages: [...chat.messages, userMessage, newAiMsg] }
+                        : chat
+                );
+            });
             
             setResultData(crisisResponse);
             setLoading(false);
@@ -136,14 +124,18 @@ const ContextProvider = (props) => {
                 </div>
             `;
 
-            setConversations((prev) =>
-                prev.map((chat) =>
-                chat.id === chatId
-                    ? { ...chat, messages: [...chat.messages, userMessage, { type: "ai", text: urgentResponse, timestamp: new Date().toLocaleTimeString(), chatId }] }
-                    : chat
-                )
-            );
-            
+            setConversations((prev) => {
+                const exists = prev.some((c) => c.id === activeChatId);
+                const newAiMsg = { type: "ai", text: urgentResponse, timestamp: new Date().toLocaleTimeString(), chatId: activeChatId };
+                if (!exists) {
+                    return [...prev, { id: activeChatId, title: finalPrompt.slice(0, 20), messages: [userMessage, newAiMsg] }];
+                }
+                return prev.map((chat) =>
+                    chat.id === activeChatId
+                        ? { ...chat, messages: [...chat.messages, userMessage, newAiMsg] }
+                        : chat
+                );
+            });
             
             setResultData(urgentResponse);
             setLoading(false);
@@ -151,45 +143,47 @@ const ContextProvider = (props) => {
             return;
         }
 
-
         setResultData("");
         setLoading(true);
         setShowResult(true);
+        setInput("");
+        setSentImage(null);
         
         setRecentPrompt({
-            text: prompt !== undefined ? prompt : input,
+            text: finalPrompt,
             image: imageFile ? URL.createObjectURL(imageFile) : null
         });
         
-        setConversations((prev) =>
-            prev.map((chat) =>
-                chat.id === chatId
-                ? { ...chat, messages: [...chat.messages, userMessage] }
-                : chat
-            )
-        );
-        
-        let response;
-        try {
-            let updatedMessages = [
-                ...(conversations.find((c) => c.id === chatId)?.messages || []),
-                userMessage,
-            ];
-
-            setConversations((prev) =>
-                prev.map((chat) =>
-                    chat.id === chatId ? { ...chat, messages: updatedMessages } : chat
-                )
+        // Add userMessage immediately to conversation
+        setConversations((prev) => {
+            const exists = prev.some((c) => c.id === activeChatId);
+            if (!exists) {
+                return [
+                    ...prev,
+                    {
+                        id: activeChatId,
+                        title: finalPrompt.slice(0, 20),
+                        messages: [userMessage],
+                    },
+                ];
+            }
+            return prev.map((chat) =>
+                chat.id === activeChatId
+                    ? { ...chat, messages: [...chat.messages, userMessage] }
+                    : chat
             );
-            
-            
-            const conversationHistory =
-                conversations.find((c) => c.id === chatId)?.messages.map((msg) => ({
-                    role: msg.type === "user" ? "user" : "model",
-                    parts: [{ text: msg.text }],
-                })) || [];
+        });
+        
+        // Capture conversation history from existing messages
+        const existingChat = conversations.find((c) => c.id === activeChatId);
+        const priorMessages = existingChat ? existingChat.messages : [];
+        const conversationHistory = priorMessages.map((msg) => ({
+            role: msg.type === "user" ? "user" : "model",
+            parts: [{ text: msg.text }],
+        }));
 
-            response = await runChatWithOptionalImage(
+        try {
+            const response = await runChatWithOptionalImage(
                 finalPrompt,
                 imageFile,
                 conversationHistory
@@ -199,57 +193,41 @@ const ContextProvider = (props) => {
                 type: 'ai',
                 text: response,
                 timestamp: new Date().toLocaleTimeString(),
-                chatId: chatId
+                chatId: activeChatId
             };
 
             setConversations((prev) =>
                 prev.map((chat) =>
-                chat.id === chatId
-                    ? { ...chat, messages: [...chat.messages, aiResponse] }
-                    : chat
+                    chat.id === activeChatId
+                        ? { ...chat, messages: [...chat.messages, aiResponse] }
+                        : chat
                 )
             );
 
-            let responseArray = response.split('**');
-            let newArray = "";
-            for (let i = 0; i < responseArray.length; i++) {
-                if (i === 0 || i % 2 !== 1) {
-                    newArray += responseArray[i]
-                }
-                else {
-                    newArray += "<b>" + responseArray[i] + "</b>"
-                }
-            }
-            responseArray = newArray.split('*').join("</br>").split(" ");
-            for (let i = 0; i < responseArray.length; i++) {
-                const nextWord = responseArray[i];
-                delayPara(i, nextWord + " ")
-            }
+            setResultData(response);
         } catch (error) {
-            console.error("Error:", error);
+            console.error("Error in onSent:", error);
             const errorResponse = "Sorry, there was an error processing your request. Please try again.";
             
             const aiResponse = {
                 type: 'ai',
                 text: errorResponse,
                 timestamp: new Date().toLocaleTimeString(),
-                chatId: chatId
+                chatId: activeChatId
             };
 
             setConversations((prev) =>
                 prev.map((chat) =>
-                chat.id === chatId
-                    ? { ...chat, messages: [...chat.messages, aiResponse] }
-                    : chat
+                    chat.id === activeChatId
+                        ? { ...chat, messages: [...chat.messages, aiResponse] }
+                        : chat
                 )
             );
             
             setResultData(errorResponse);
+        } finally {
+            setLoading(false);
         }
-        
-        setLoading(false);
-        setInput("")
-        setSentImage(null);
     };
 
     const newChat = () => {
