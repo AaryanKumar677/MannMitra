@@ -171,9 +171,9 @@ const Main = ({ user, onOpenSettings }) => {
                   <img src={assets.gemini_icon} alt="" />
                   <div className="message" style={{ width: "100%" }}>
                     <div className="loader">
-                      <hr className="animated-bg" />
-                      <hr className="animated-bg" />
-                      <hr className="animated-bg" />
+                      <hr className="animated-bg" style={{ width: "100%", height: "20px", margin: 0, border: "none", display: "block" }} />
+                      <hr className="animated-bg" style={{ width: "100%", height: "20px", margin: 0, border: "none", display: "block" }} />
+                      <hr className="animated-bg" style={{ width: "100%", height: "20px", margin: 0, border: "none", display: "block" }} />
                     </div>
                   </div>
                 </div>
