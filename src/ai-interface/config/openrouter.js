@@ -5,16 +5,15 @@ const API_KEY =
   "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";
 
 const DEFAULT_MODEL =
-  import.meta.env?.VITE_OPENROUTER_MODEL || "openrouter/free";
+  import.meta.env?.VITE_OPENROUTER_MODEL || "minimax/minimax-m3.1-flash:free";
 
 // List of fallback free models in case of upstream rate-limiting
 const FALLBACK_MODELS = [
   DEFAULT_MODEL,
-  "openrouter/free",
   "minimax/minimax-m3.1-flash:free",
   "nvidia/nemotron-3.5-lightning:free",
   "liquid/lfm-2.5-2.6b:free",
-  "thinkingmachines/inkling:free",
+  "openrouter/free",
 ];
 
 // Deduplicate fallback models
@@ -114,9 +113,13 @@ async function callOpenRouter(models, messages, temperature = 0.7) {
   let lastError = null;
 
   for (const model of models) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+
     try {
       const response = await fetch(OPENROUTER_API_URL, {
         method: "POST",
+        signal: controller.signal,
         headers: {
           Authorization: `Bearer ${API_KEY}`,
           "Content-Type": "application/json",
@@ -130,10 +133,11 @@ async function callOpenRouter(models, messages, temperature = 0.7) {
           model,
           messages,
           temperature,
-          max_tokens: 1500,
+          max_tokens: 800,
         }),
       });
 
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (!response.ok) {
@@ -151,7 +155,8 @@ async function callOpenRouter(models, messages, temperature = 0.7) {
         continue;
       }
     } catch (err) {
-      console.warn(`Network error trying model ${model}:`, err);
+      clearTimeout(timeoutId);
+      console.warn(`Network error trying model ${model}:`, err?.message || err);
       lastError = err;
     }
   }

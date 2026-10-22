@@ -70,7 +70,7 @@ const Main = ({ user, onOpenSettings }) => {
     return () => {
       isMounted = false;
     };
-  }, [currentMessages]);
+  }, [currentMessages, loading]);
 
   // Enter key handler function
   const handleKeyPress = (e) => {
@@ -174,6 +174,18 @@ const Main = ({ user, onOpenSettings }) => {
                   </div>
                 );
               })}
+              {loading && (
+                <div className="ai-message-box loading-box">
+                  <img src={assets.gemini_icon} alt="MannMitra" className="loading-avatar" />
+                  <div className="message" style={{ width: "100%" }}>
+                    <div className="loader">
+                      <hr className="animated-bg" />
+                      <hr className="animated-bg" />
+                      <hr className="animated-bg" />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             ) : (
               <>
