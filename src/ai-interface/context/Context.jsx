@@ -110,7 +110,7 @@ const ContextProvider = (props) => {
             setConversations((prev) =>
                 prev.map((chat) =>
                 chat.id === chatId
-                    ? { ...chat, messages: [...chat.messages, userMessage, { type: "ai", text: urgentResponse, timestamp: new Date().toLocaleTimeString(), chatId }] }
+                    ? { ...chat, messages: [...chat.messages, userMessage, { type: "ai", text: crisisResponse, timestamp: new Date().toLocaleTimeString(), chatId }] }
                     : chat
                 )
             );
